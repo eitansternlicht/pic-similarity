@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const { Client } = require('@elastic/elasticsearch');
+const { imageClassification, imagesClassification, toESjson } = require('./classify');
 const client = new Client({
     node: 'http://localhost:9200/'
 });
@@ -13,8 +14,12 @@ app.use(cors());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
+
 app.post('/search', (req, res) => {
-    console.log('req descriptions', req.body.data.descriptions);
+    
+    toESjson("results.json");
+    // imagesClassification('/Users/roisulimani/Desktop/corpus');
+    // console.log('req descriptions', req.body.data.descriptions);
     const { descriptions } = req.body.data;
 
     client
@@ -27,11 +32,11 @@ app.post('/search', (req, res) => {
             },
         })
         .then(result => {
-            console.log('res', result);
+            // console.log('res', result);
             res.send({ descriptions: result });
         })
         .catch(error => {
-            console.log('error', error);
+            // console.log('error', error);
             res.send({ error: error });
         });
 });
