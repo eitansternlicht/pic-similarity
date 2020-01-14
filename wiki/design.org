@@ -1,0 +1,35 @@
+* Client
+** REACTS
+*** TODO File Picker (For images)
+*** DONE mock Descriptions input box
+*** TODO Upload image button
+*** TODO Sends to Rest API image
+*** DONE sends mock to rest API image descriptions
+**** TODO result = set of k images that are most similar
+**** DONE result mock = set of image descriptions
+* Server
+** DONE 1. Initialize ELASTIC 
+*** DONE 1.1 create mock descriptions
+*** DONE 1.2 bulk upload mock descriptions
+   
+** DONE 2. REST API
+*** DONE gets mock request = image descriptions
+*** DONE query elastic and return k description with highest score
+
+** TODO Replace mock descriptions with images and real description
+** TODO Export all of the data from Michal's elastic search and import into ours
+** TODO Set up server host in college
+*** Ask to open ports
+*** Seperate accounts for seperate computers
+** TODO Image Classification
+*** RESNET
+*** Tensor flow JS (Node)
+    https://becominghuman.ai/image-classification-machine-learning-in-node-js-with-tensorflow-js-dd8e20ba5024
+
+*** Pytorch
+*** Google Vision
+*** Elasticsearch image classifier
+** TODO Add probabilitty values into elasticsearch query
+
+
+
