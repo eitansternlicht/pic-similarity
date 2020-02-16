@@ -358,3 +358,4 @@ sketch
 # Markdown Navigator plugin
 
 # End of https://www.gitignore.io/api/react,macos,emacs,django,pycharm,webstorm
+static/
