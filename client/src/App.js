@@ -1,86 +1,92 @@
-import React, { useState } from "react";
-import axios from "axios";
 import "./App.css";
-import ImageUploader from 'react-images-upload';
+import "bootstrap/dist/css/bootstrap.min.css";
 
+import React, { useState } from "react";
+
+import Button from "react-bootstrap/Button";
+import Card from "react-bootstrap/Card";
+import Col from "react-bootstrap/Col";
+import Container from "react-bootstrap/Container";
+import Form from "react-bootstrap/Form";
+import Image from "react-bootstrap/Image";
+import Row from "react-bootstrap/Row";
+import Spinner from "react-bootstrap/Spinner";
+import axios from "axios";
+import { lens } from "./utils/funcutils";
+
+const PORT = 3000;
 function App() {
-    const [descriptions, setDescription] = useState("");
+    const [imageDescriptions, setImageDescriptions] = useState("");
     const [results, setResults] = useState([]);
-    const [picture, setPicture] = useState([]);
+    const [searchImage, setSearchImage] = useState(undefined);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(false);
 
-    const onDrop = (pic) => {
-        setPicture(pic);
-        console.log(pic);
-        const formData = new FormData();
-        formData.append('file', pic);
-        formData.append('name', 'file')
-        axios({
-            method: 'post',
-            url: "http://localhost:3000/upload",
-            data: formData,
-            headers: {'Content-Type': 'multipart/form-data'}
-        })
-            // .post("http://localhost:3000/upload", { file: pic[0] })
-            .then(response => {
-                console.log("response", response);
+    const onChangeFilePicker = event => {
+        setSearchImage(event.target.files[0]);
+    };
+    const onClickGetSimilar = () => {
+        setLoading(true);
+        console.log("onClickGetSimilar", searchImage);
+        const data = new FormData();
+        data.append("file", searchImage);
+        axios
+            .post(`http://localhost:${PORT}/upload`, data, {})
+            .then(res => {
+                console.log("res", res);
+                setLoading(false);
+                const results = lens(res, "data.elasticSearchResult.body.hits.hits");
+                if (results && results.length > 0) {
+                    setError(false);
+                    setResults(res.data.elasticSearchResult.body.hits.hits);
+                    setImageDescriptions(res.data.imageDescriptions);
+                }
             })
-            .catch(error => {
-                console.log("error", error);
+            .catch(e => {
+                console.error(e);
+                setLoading(false);
             });
-    }
-
-    const onUpload = event => {
-        event.stopPropagation();
-
-    }
+    };
 
     return (
-        <div>
-            <input
-                className="App"
-                type="text"
-                placeholder="choose repository path"
-                style={{ width: 200 }}
-                value={descriptions}
-                onChange={e => setDescription(e.target.value)}
-            ></input>
-            <button
-                onClick={() => {
-                    console.log("sending", descriptions);
-                    axios
-                        .post("http://localhost:3000/search", { data: { descriptions } })
-                        .then(response => {
-                            const { hits } = response.data.descriptions.body.hits;
-                            const sources = hits.map(({ _source }) => _source.descriptions);
-                            console.log("hits", sources);
-                            setResults(sources);
-                        })
-                        .catch(error => {
-                            console.log("error", error);
-                        });
-                }}
+        <Container>
+            <h1>Pic Similarity Service</h1>
+            <h2>Upload Image</h2>
+            <input type="file" accept="image/*" name="file" onChange={onChangeFilePicker} />
+            <Button
+                varient="primary"
+                onClick={onClickGetSimilar}
+                type="submit"
+                disabled={!searchImage}
             >
-                Send
-            </button>
-        {results.map(result => (<div key={result}>{result}</div>))}
+                Get Similar
+            </Button>
+            {loading ? <Spinner animation="border" /> : null}
 
-        {/* <ImageUploader
-            singleImage={true}
-            withIcon={true}
-            buttonText='Choose image'
-            onChange={onDrop}
-            imgExtension={['.jpg', '.gif', '.png', '.gif']}
-        /> */}
-        {/* <form><input type="file" /><button type="submit">Upload</button></form> */}
-
-        <h1>Upload Image</h1>
- 
-         <form onSubmit={onUpload} action="http://localhost:3000/upload" method="post" enctype="multipart/form-data">
-            <input type="file" accept="image/*" name="file" />
-            <input type="submit" value="upload"/>
-        </form>
-
-        </div>
+            {!error && !loading && results.length > 0 ? (
+                <Container>
+                    {imageDescriptions ? (
+                        <h3>Descriptions extracted from search image: {imageDescriptions}</h3>
+                    ) : null}
+                    <Row>
+                        {results.map(hit => {
+                            const { filename, descriptions } = hit._source;
+                            const url = `http://localhost:${PORT}/image-storage/${filename}`;
+                            console.log("url", url);
+                            return (
+                                <Card style={{ width: "18rem" }}>
+                                    <Card.Img variant="top" src={url} />
+                                    <Card.Body>
+                                        <Card.Title>Descriptions</Card.Title>
+                                        <Card.Text>{descriptions}</Card.Text>
+                                    </Card.Body>
+                                </Card>
+                            );
+                        })}
+                    </Row>
+                </Container>
+            ) : null}
+        </Container>
     );
 }
 
