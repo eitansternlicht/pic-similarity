@@ -21,11 +21,13 @@ function App() {
     const [searchImage, setSearchImage] = useState(undefined);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(false);
+    const [queryTime, setQueryTime] = useState(null)
 
     const onChangeFilePicker = event => {
         setSearchImage(event.target.files[0]);
     };
     const onClickGetSimilar = () => {
+        const date1 = new Date()
         setLoading(true);
         console.log("onClickGetSimilar", searchImage);
         const data = new FormData();
@@ -38,8 +40,11 @@ function App() {
                 const results = lens(res, "data.elasticSearchResult.body.hits.hits");
                 if (results && results.length > 0) {
                     setError(false);
-                    setResults(res.data.elasticSearchResult.body.hits.hits);
-                    setImageDescriptions(res.data.imageDescriptions);
+                    setResults(res.data.elasticSearchResult.body.hits.hits.slice(1));
+                    setImageDescriptions(res.data.elasticSearchResult.body.hits.hits[0]._source.labelAnnotations.map(annotation => {
+                            return annotation.description
+                    }).join(", "));
+                    setQueryTime(new Date() - date1)
                 }
             })
             .catch(e => {
@@ -58,27 +63,36 @@ function App() {
                 onClick={onClickGetSimilar}
                 type="submit"
                 disabled={!searchImage}
+                style={{marginRight: 10}}
             >
                 Get Similar
             </Button>
+    {queryTime? <span> Query Time: {queryTime} ms</span>: null}
             {loading ? <Spinner animation="border" /> : null}
 
             {!error && !loading && results.length > 0 ? (
                 <Container>
                     {imageDescriptions ? (
-                        <h3>Descriptions extracted from search image: {imageDescriptions}</h3>
+                        <>
+                        <h3>Descriptions extracted from search image: </h3>
+                        <h4>{imageDescriptions}</h4>
+                        </>
                     ) : null}
                     <Row>
                         {results.map(hit => {
-                            const { filename, descriptions } = hit._source;
-                            const url = `http://localhost:${PORT}/image-storage/${filename}`;
+                            const { image_path , labelAnnotations} = hit._source;
+                            const descriptions = labelAnnotations.map(annotation =>{
+                                return annotation.description;
+                            })
+                            const descriptionString = descriptions.join(", ")
+                            const url = `http://localhost:${PORT}/image-storage/${image_path}`;
                             console.log("url", url);
                             return (
                                 <Card style={{ width: "18rem" }}>
                                     <Card.Img variant="top" src={url} />
                                     <Card.Body>
                                         <Card.Title>Descriptions</Card.Title>
-                                        <Card.Text>{descriptions}</Card.Text>
+                                        <Card.Text>{descriptionString}</Card.Text>
                                     </Card.Body>
                                 </Card>
                             );
