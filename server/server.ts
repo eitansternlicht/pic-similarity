@@ -71,6 +71,7 @@ app.use(json());
 app.use(expressStatic('static'));
 
 app.post('/upload', upload.single('file'), (req, res) => {
+    const results: { tfIdf?: any; doc2vec?: any } = {};
     if ('file' in req) {
         // const imagePath = (req as { file: { path: string } }).file.path;
         const originalName = (req as { file: { originalname: string } }).file
@@ -91,12 +92,10 @@ app.post('/upload', upload.single('file'), (req, res) => {
                 },
             })
             .then(result => {
-                console.log(
-                    'result',
-                    result.body.hits.hits[0]._source.tfIdf_vector
-                );
                 const tfIdf_vector =
                     result.body.hits.hits[0]._source.tfIdf_vector;
+                const doc2vec_vector =
+                    result.body.hits.hits[0]._source.doc2vec_vector;
                 client
                     .search({
                         index: 'labels',
@@ -119,12 +118,37 @@ app.post('/upload', upload.single('file'), (req, res) => {
                         },
                     })
                     .then(result => {
+                        results.tfIdf = result;
                         console.log('result', result.body.hits.hits);
+                        client
+                            .search({
+                                index: 'labels',
+                                size: 6,
+                                body: {
+                                    query: {
+                                        function_score: {
+                                            query: { match_all: {} },
+                                            script_score: {
+                                                script: {
+                                                    source:
+                                                        "cosineSimilarity (params.query_vector, doc['doc2vec_vector']) + 1.0",
+                                                    params: {
+                                                        query_vector: doc2vec_vector,
+                                                    },
+                                                },
+                                            },
+                                        },
+                                    },
+                                },
+                            })
+                            .then(result => {
+                                results.doc2vec = result;
 
-                        res.json({
-                            elasticSearchResult: result,
-                            imageDescriptions: ['descriptions'],
-                        });
+                                res.json({
+                                    results,
+                                });
+                            });
+
                         // res.send('' + JSON.stringify(result));
                     });
             })

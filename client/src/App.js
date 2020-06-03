@@ -19,7 +19,7 @@ import VerticalSlider from "./VerticalSlider";
 const PORT = 3000;
 function App() {
   const [imageDescriptions, setImageDescriptions] = useState("");
-  const [results, setResults] = useState([]);
+  const [results, setResults] = useState({ tfIdf: [], doc2vec: [] });
   const [searchImage, setSearchImage] = useState(undefined);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
@@ -53,12 +53,24 @@ function App() {
       .then((res) => {
         console.log("res", res);
         setLoading(false);
-        const results = lens(res, "data.elasticSearchResult.body.hits.hits");
-        if (results && results.length > 0) {
+        const tfIdfResults = lens(res, "data.results.tfIdf.body.hits.hits");
+        const doc2vecResults = lens(res, "data.results.doc2vec.body.hits.hits");
+        console.log(JSON.stringify(tfIdfResults));
+        console.log(JSON.stringify(doc2vecResults));
+
+        if (
+          tfIdfResults &&
+          tfIdfResults.length > 0 &&
+          doc2vecResults &&
+          doc2vecResults.length > 0
+        ) {
           setError(false);
-          setResults(res.data.elasticSearchResult.body.hits.hits);
+          setResults({
+            tfIdf: tfIdfResults,
+            doc2vec: doc2vecResults,
+          });
           setImageDescriptions(
-            res.data.elasticSearchResult.body.hits.hits[0]._source.labelAnnotations
+            tfIdfResults[0]._source.labelAnnotations
               .map((annotation) => {
                 return annotation.description;
               })
@@ -126,20 +138,53 @@ function App() {
       {queryTime ? <span> Query Time: {queryTime} ms</span> : null}
       {loading ? <Spinner animation="border" /> : null}
 
-      {!error && !loading && results.length > 0 && !clearScreen ? (
+      {!error &&
+      !loading &&
+      results.tfIdf.length > 0 &&
+      results.doc2vec.length > 0 &&
+      !clearScreen ? (
         <Container>
           {imageDescriptions && !clearScreen ? (
             <Card style={{ width: "18rem" }}>
-              <Card.Img variant="top" src={getURL(results[0])} />
+              <Card.Img variant="top" src={getURL(results.tfIdf[0])} />
               <Card.Body>
                 <Card.Title>Search Image</Card.Title>
                 <Card.Text>{imageDescriptions}</Card.Text>
               </Card.Body>
             </Card>
           ) : null}
+          <h4>tfIdf results</h4>
+          <Row>
+            {results.tfIdf.slice(1).map((hit) => {
+              const { image_path, labelAnnotations } = hit._source;
+
+              const descriptions = labelAnnotations.map((annotation) => {
+                return annotation.description;
+              });
+              const descriptionString = descriptions.join(", ");
+              const url = `http://localhost:${PORT}/image-storage/${image_path}`;
+              console.log("url", url);
+              return (
+                <Card style={{ width: "18rem" }}>
+                  <Card.Img variant="top" src={url} />
+                  <Card.Body>
+                    <Card.Title>
+                      Score: {Math.round((hit._score - 1) * 100)}%
+                    </Card.Title>
+                    <Card.Title>Lables</Card.Title>
+                    <Card.Text>{descriptionString}</Card.Text>
+                  </Card.Body>
+                </Card>
+              );
+            })}
+          </Row>
+          <VerticalSlider
+            onSetSlider={(numChosen) => setRatings({ tf_idf: numChosen })}
+          ></VerticalSlider>
+          <h4>doc2vec results</h4>
 
           <Row>
-            {results.slice(1).map((hit) => {
+            {results.doc2vec.slice(1).map((hit) => {
               const { image_path, labelAnnotations } = hit._source;
               const descriptions = labelAnnotations.map((annotation) => {
                 return annotation.description;
@@ -151,7 +196,10 @@ function App() {
                 <Card style={{ width: "18rem" }}>
                   <Card.Img variant="top" src={url} />
                   <Card.Body>
-                    <Card.Title>Descriptions</Card.Title>
+                    <Card.Title>
+                      Score: {Math.round((hit._score - 1) * 100)}%
+                    </Card.Title>
+                    <Card.Title>Lables</Card.Title>
                     <Card.Text>{descriptionString}</Card.Text>
                   </Card.Body>
                 </Card>
@@ -159,7 +207,7 @@ function App() {
             })}
           </Row>
           <VerticalSlider
-            onSetSlider={(numChosen) => setRatings({ tf_idf: numChosen })}
+            onSetSlider={(numChosen) => setRatings({ doc2vec: numChosen })}
           ></VerticalSlider>
 
           <Button
