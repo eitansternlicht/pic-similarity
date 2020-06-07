@@ -17,11 +17,22 @@ import { join } from 'path';
 import { makeUrl } from './utils/image-storage';
 import multer from 'multer';
 
+const ids: string[] = readFileSync('docIds.txt')
+    .toString()
+    .split('\n');
+
+export const generateRandomId = (ids: string[]): string =>
+    ids[Math.floor(Math.random() * ids.length)];
+
+// const dataDocs: DataDoc[] = readJSON('../data.json');
+// const ids = dataDocs.map(doc => doc._id);
+// writeFileSync('docIds.txt', ids.join('\n'));
+
 // const docsVectors = JSON.parse(
 //     readFileSync('../data_proccessing/doc2vec/docVectors.json').toString()
 // );
 // console.log(docsVectors.map(vec => vec.length));
-// const dataDocs: DataDoc[] = readJSON('../data.json');
+///const dataDocs: DataDoc[] = readJSON('../data.json');
 // addDocVectors(dataDocs, docsVectors);
 // const idToTerm = addTfIdfVector(dataDocs);
 // writeJSON(dataDocs, 'new-data.json');
@@ -69,146 +80,155 @@ app.use(urlencoded({ extended: false }));
 app.use(json());
 
 app.use(expressStatic('static'));
-
+app.get('/random', (req, res) => {
+    queryElasticsearch().then(results => res.json(results));
+});
 app.post('/upload', upload.single('file'), (req, res) => {
-    const results: { tfIdf?: any; doc2vec?: any } = {};
     if ('file' in req) {
         // const imagePath = (req as { file: { path: string } }).file.path;
         const originalName = (req as { file: { originalname: string } }).file
             .originalname;
-        client
-            .search({
-                index: 'labels',
-                body: {
-                    query: {
-                        constant_score: {
-                            filter: {
-                                term: {
-                                    image_path: originalName,
-                                },
-                            },
-                        },
-                    },
-                },
-            })
-            .then(result => {
-                const tfIdf_vector =
-                    result.body.hits.hits[0]._source.tfIdf_vector;
-                const doc2vec_vector =
-                    result.body.hits.hits[0]._source.doc2vec_vector;
-                client
-                    .search({
-                        index: 'labels',
-                        size: 6,
-                        body: {
-                            query: {
-                                function_score: {
-                                    query: { match_all: {} },
-                                    script_score: {
-                                        script: {
-                                            source:
-                                                "cosineSimilaritySparse (params.query_vector, doc['tfIdf_vector']) + 1.0",
-                                            params: {
-                                                query_vector: tfIdf_vector,
-                                            },
-                                        },
-                                    },
-                                },
-                            },
-                        },
-                    })
-                    .then(result => {
-                        results.tfIdf = result;
-                        console.log('result', result.body.hits.hits);
-                        client
-                            .search({
-                                index: 'labels',
-                                size: 6,
-                                body: {
-                                    query: {
-                                        function_score: {
-                                            query: { match_all: {} },
-                                            script_score: {
-                                                script: {
-                                                    source:
-                                                        "cosineSimilarity (params.query_vector, doc['doc2vec_vector']) + 1.0",
-                                                    params: {
-                                                        query_vector: doc2vec_vector,
-                                                    },
-                                                },
-                                            },
-                                        },
-                                    },
-                                },
-                            })
-                            .then(result => {
-                                results.doc2vec = result;
-
-                                res.json({
-                                    results,
-                                });
-                            });
-
-                        // res.send('' + JSON.stringify(result));
-                    });
-            })
-            .catch(reason => console.log('error', reason));
-
-        // classifyImage(imagePath).then(predictions => {
-        //     if (predictions && predictions.length > 1) {
-        //         const descriptions = predictions[0].className;
-        //         console.log('searching for ', descriptions);
-        //         client
-        //             .search({
-        //                 index: 'image_descriptions',
-        //                 body: {
-        //                     query: {
-        //                         match: { descriptions },
-        //                     },
-        //                 },
-        //             })
-        //             .then(result => {
-        //                 // console.log('result', result);
-        //                 res.json({
-        //                     elasticSearchResult: result,
-        //                     imageDescriptions: descriptions,
-        //                 });
-        //                 // res.send('' + JSON.stringify(result));
-        //             })
-        //             .catch(reason => console.log('error', reason));
-        //     }
-        //     // console.log('predictions after', predictions);
-        //     // res.json(predictions);
-        // });
-    } else throw new Error('error');
+        queryElasticsearch(originalName).then(results => res.json(results));
+    } else {
+        throw new Error('error no file uploaded');
+    }
 });
+
+// classifyImage(imagePath).then(predictions => {
+//     if (predictions && predictions.length > 1) {
+//         const descriptions = predictions[0].className;
+//         console.log('searching for ', descriptions);
+//         client
+//             .search({
+//                 index: 'image_descriptions',
+//                 body: {
+//                     query: {
+//                         match: { descriptions },
+//                     },
+//                 },
+//             })
+//             .then(result => {
+//                 // console.log('result', result);
+//                 res.json({
+//                     elasticSearchResult: result,
+//                     imageDescriptions: descriptions,
+//                 });
+//                 // res.send('' + JSON.stringify(result));
+//             })
+//             .catch(reason => console.log('error', reason));
+//     }
+//     // console.log('predictions after', predictions);
+//     // res.json(predictions);
+// });
+//     } else throw new Error('error');
+// });
 
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}!`);
 });
 
-const bla = () => {
-    // console.log('results', tensorflowResults);
-    // const b = Object.keys(tensorflowResults).map(filename => ({
-    //     filename,
-    //     descriptions: tensorflowResults[filename][0].className
-    //         .split(', ')
-    //         .join(','),
-    // }));
-    // const s = JSON.stringify(b);
-    // const fileBuffer = readFileSync('tensorflow-results-naive.json');
-    // const oldJSON = JSON.parse(fileBuffer);
-    // const newJSON = oldJSON.map(imageObj => {
-    //     return {
-    //         _index: 'image_descriptions',
-    //         _type: '_doc',
-    //         _id: imageObj.filename,
-    //         _score: 1,
-    //         _source: imageObj,
-    //     };
-    // });
-    // writeFileSync(
-    //     'tensorflow-results-naive2.json',
-    //     newJSON.map(JSON.stringify).join('')
-    // );
+// const bla = () => {
+// console.log('results', tensorflowResults);
+// const b = Object.keys(tensorflowResults).map(filename => ({
+//     filename,
+//     descriptions: tensorflowResults[filename][0].className
+//         .split(', ')
+//         .join(','),
+// }));
+// const s = JSON.stringify(b);
+// const fileBuffer = readFileSync('tensorflow-results-naive.json');
+// const oldJSON = JSON.parse(fileBuffer);
+// const newJSON = oldJSON.map(imageObj => {
+//     return {
+//         _index: 'image_descriptions',
+//         _type: '_doc',
+//         _id: imageObj.filename,
+//         _score: 1,
+//         _source: imageObj,
+//     };
+// });
+// writeFileSync(
+//     'tensorflow-results-naive2.json',
+//     newJSON.map(JSON.stringify).join('')
+// );
+// };
+
+const queryElasticsearch = (imageFilename?: string) => {
+    if (!imageFilename) {
+        imageFilename = generateRandomId(ids);
+    }
+    const results: { tfIdf?: any; doc2vec?: any } = {};
+    return client
+        .search({
+            index: 'labels',
+            body: {
+                query: {
+                    constant_score: {
+                        filter: {
+                            term: {
+                                image_path: imageFilename,
+                            },
+                        },
+                    },
+                },
+            },
+        })
+        .then(result => {
+            const tfIdf_vector = result.body.hits.hits[0]._source.tfIdf_vector;
+            const doc2vec_vector =
+                result.body.hits.hits[0]._source.doc2vec_vector;
+            client
+                .search({
+                    index: 'labels',
+                    size: 6,
+                    body: {
+                        query: {
+                            function_score: {
+                                query: { match_all: {} },
+                                script_score: {
+                                    script: {
+                                        source:
+                                            "cosineSimilaritySparse(params.query_vector, doc['tfIdf_vector']) + 1.0",
+                                        params: {
+                                            query_vector: tfIdf_vector,
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                })
+                .then(result => {
+                    results.tfIdf = result;
+                    client
+                        .search({
+                            index: 'labels',
+                            size: 6,
+                            body: {
+                                query: {
+                                    function_score: {
+                                        query: { match_all: {} },
+                                        script_score: {
+                                            script: {
+                                                source:
+                                                    "cosineSimilarity (params.query_vector, doc['doc2vec_vector']) + 1.0",
+                                                params: {
+                                                    query_vector: doc2vec_vector,
+                                                },
+                                            },
+                                        },
+                                    },
+                                },
+                            },
+                        })
+                        .then(result => {
+                            results.doc2vec = result;
+                            console.log('results', results);
+                            return results;
+                        });
+
+                    // res.send('' + JSON.stringify(result));
+                });
+        })
+        .catch(reason => console.log('error', reason));
 };
