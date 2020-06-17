@@ -1,0 +1,18 @@
+{
+    "labels": {
+        "mappings": {
+            "properties": {
+                "Image path": { "type": "text" },
+                "labelAnnotations": {
+                    "properties": {
+                        "description": { "type": "text" },
+                        "mid": { "type": "text" },
+                        "score": { "type": "float" },
+                        "topicality": { "type": "float" }
+                    }
+                },
+                "tfidf_vector": { "type": "sparse_vector" }
+            }
+        }
+    }
+}

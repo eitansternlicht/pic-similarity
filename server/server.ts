@@ -13,20 +13,22 @@ import { json, urlencoded } from 'body-parser';
 import { Client } from '@elastic/elasticsearch';
 import { classifyImage } from './classify';
 import cors from 'cors';
-import { join } from 'path';
+import path from 'path';
 import { makeUrl } from './utils/image-storage';
 import multer from 'multer';
 
-const ids: string[] = readFileSync('docIds.txt')
+const image_paths: string[] = readFileSync('image_paths.txt')
     .toString()
     .split('\n');
 
-export const generateRandomId = (ids: string[]): string =>
-    ids[Math.floor(Math.random() * ids.length)];
+export const generateRandomImagePath = (image_paths: string[]): string =>
+    image_paths[Math.floor(Math.random() * image_paths.length)];
 
 // const dataDocs: DataDoc[] = readJSON('../data.json');
-// const ids = dataDocs.map(doc => doc._id);
-// writeFileSync('docIds.txt', ids.join('\n'));
+// const image_paths = dataDocs.map(doc =>
+//     path.win32.basename(doc._source['Image path'])
+// );
+// writeFileSync('image_paths.txt', image_paths.join('\n'));
 
 // const docsVectors = JSON.parse(
 //     readFileSync('../data_proccessing/doc2vec/docVectors.json').toString()
@@ -81,14 +83,18 @@ app.use(json());
 
 app.use(expressStatic('static'));
 app.get('/random', (req, res) => {
-    queryElasticsearch().then(results => res.json(results));
+    console.log('here');
+    queryElasticsearch().then(results => {
+        res.json(results);
+    });
 });
 app.post('/upload', upload.single('file'), (req, res) => {
     if ('file' in req) {
-        // const imagePath = (req as { file: { path: string } }).file.path;
         const originalName = (req as { file: { originalname: string } }).file
             .originalname;
-        queryElasticsearch(originalName).then(results => res.json(results));
+        queryElasticsearch(originalName).then(results => {
+            res.json(results);
+        });
     } else {
         throw new Error('error no file uploaded');
     }
@@ -155,8 +161,9 @@ app.listen(port, () => {
 
 const queryElasticsearch = (imageFilename?: string) => {
     if (!imageFilename) {
-        imageFilename = generateRandomId(ids);
+        imageFilename = generateRandomImagePath(image_paths);
     }
+    console.log('random File name', imageFilename);
     const results: { tfIdf?: any; doc2vec?: any } = {};
     return client
         .search({
@@ -177,7 +184,7 @@ const queryElasticsearch = (imageFilename?: string) => {
             const tfIdf_vector = result.body.hits.hits[0]._source.tfIdf_vector;
             const doc2vec_vector =
                 result.body.hits.hits[0]._source.doc2vec_vector;
-            client
+            return client
                 .search({
                     index: 'labels',
                     size: 6,
@@ -200,7 +207,7 @@ const queryElasticsearch = (imageFilename?: string) => {
                 })
                 .then(result => {
                     results.tfIdf = result;
-                    client
+                    return client
                         .search({
                             index: 'labels',
                             size: 6,
@@ -226,8 +233,6 @@ const queryElasticsearch = (imageFilename?: string) => {
                             console.log('results', results);
                             return results;
                         });
-
-                    // res.send('' + JSON.stringify(result));
                 });
         })
         .catch(reason => console.log('error', reason));

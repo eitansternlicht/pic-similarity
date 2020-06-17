@@ -359,3 +359,5 @@ sketch
 
 # End of https://www.gitignore.io/api/react,macos,emacs,django,pycharm,webstorm
 static/
+ignored-files/
+data_proccessing/
