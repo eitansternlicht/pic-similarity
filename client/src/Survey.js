@@ -23,7 +23,7 @@ export const Survey = () => {
   const [searchImage, setSearchImage] = useState(undefined);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
-  const [queryTime, setQueryTime] = useState(null);
+  const [queryTime, setQueryTime] = useState({ tfIdf: null, doc2vec: null });
   const [ratings, setRatings] = useState({
     tfIdf: [5, 5, 5, 5, 5],
     doc2vec: [5, 5, 5, 5, 5],
@@ -44,7 +44,6 @@ export const Survey = () => {
     setSearchImage(event.target.files[0]);
   };
   const onClickGetSimilar = () => {
-    const date1 = new Date();
     setClearScreen(false);
     setError(false);
     setLoading(true);
@@ -54,7 +53,12 @@ export const Survey = () => {
         console.log("res", res);
         setLoading(false);
         const tfIdfResults = lens(res, "data.tfIdf.body.hits.hits");
+        setQueryTime({
+          tfIdf: lens(res, "data.tfIdf.body.took"),
+          doc2vec: lens(res, "data.doc2vec.body.took"),
+        });
         const doc2vecResults = lens(res, "data.doc2vec.body.hits.hits");
+
         console.log(JSON.stringify(tfIdfResults));
         console.log(JSON.stringify(doc2vecResults));
 
@@ -76,7 +80,6 @@ export const Survey = () => {
               })
               .join(", ")
           );
-          setQueryTime(new Date() - date1);
         }
       })
       .catch((e) => {
@@ -97,6 +100,7 @@ export const Survey = () => {
       .add({
         searched_image: results.tfIdf[0]._source.image_path,
         tfIdf: {
+          queryTime: queryTime.tfIdf,
           results: results.tfIdf.slice(1).map((result, i) => {
             return {
               image_path: result._source.image_path,
@@ -106,6 +110,7 @@ export const Survey = () => {
           }),
         },
         doc2vec: {
+          queryTime: queryTime.doc2vec,
           results: results.doc2vec.slice(1).map((result, i) => {
             return {
               image_path: result._source.image_path,
@@ -122,7 +127,7 @@ export const Survey = () => {
         setSearchImage(null);
         setRatings({ tfIdf: [5, 5, 5, 5, 5], doc2vec: [5, 5, 5, 5, 5] });
         setError(false);
-        setQueryTime(null);
+        setQueryTime({ tfIdf: null, doc2vec: null });
         imageInputRef.value = null;
         console.log(res);
       })
@@ -142,7 +147,6 @@ export const Survey = () => {
       >
         Get Random
       </Button>
-      {queryTime ? <span> Query Time: {queryTime} ms</span> : null}
       {loading ? <Spinner animation="border" /> : null}
 
       {!error &&

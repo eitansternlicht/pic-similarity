@@ -24,7 +24,6 @@ export const App = () => {
   const [searchImage, setSearchImage] = useState(undefined);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
-  const [queryTime, setQueryTime] = useState(null);
   const [clearScreen, setClearScreen] = useState(false);
   const [imageInputRef, setImageInputRef] = useState("");
   const db = firebase.firestore();
