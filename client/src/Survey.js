@@ -24,7 +24,10 @@ export const Survey = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
   const [queryTime, setQueryTime] = useState(null);
-  const [ratings, setRatings] = useState({ tfIdf: 5, doc2vec: 5 });
+  const [ratings, setRatings] = useState({
+    tfIdf: [5, 5, 5, 5, 5],
+    doc2vec: [5, 5, 5, 5, 5],
+  });
   const [clearScreen, setClearScreen] = useState(false);
   const [imageInputRef, setImageInputRef] = useState("");
   const db = firebase.firestore();
@@ -82,27 +85,32 @@ export const Survey = () => {
       });
   };
 
+  const updateRatings = (ratings, numChosen, i) => {
+    const newRatings = ratings;
+    newRatings[i] = numChosen;
+    return newRatings;
+  };
+
   const addVoteToFirebase = () => {
     console.log("ratings", ratings);
     db.collection("scores")
       .add({
         searched_image: results.tfIdf[0]._source.image_path,
         tfIdf: {
-          user_rating: ratings.tfIdf,
           results: results.tfIdf.slice(1).map((result, i) => {
             return {
               image_path: result._source.image_path,
               labelAnnotations: result._source.labelAnnotations,
-              user_rating: ratings,
+              user_rating: ratings.tfIdf[i],
             };
           }),
         },
         doc2vec: {
-          user_rating: ratings.doc2vec,
-          results: results.doc2vec.slice(1).map((result) => {
+          results: results.doc2vec.slice(1).map((result, i) => {
             return {
               image_path: result._source.image_path,
               labelAnnotations: result._source.labelAnnotations,
+              user_rating: ratings.doc2vec[i],
             };
           }),
         },
@@ -112,7 +120,7 @@ export const Survey = () => {
         setImageDescriptions(null);
         setResults([]);
         setSearchImage(null);
-        setRatings({ tfIdf: 5, doc2vec: 5 });
+        setRatings({ tfIdf: [5, 5, 5, 5, 5], doc2vec: [5, 5, 5, 5, 5] });
         setError(false);
         setQueryTime(null);
         imageInputRef.value = null;
@@ -182,27 +190,42 @@ export const Survey = () => {
           <Row>
             <VerticalSlider
               onSetSlider={(numChosen) =>
-                setRatings({ ...ratings, tfIdf: Number.parseInt(numChosen) })
+                setRatings({
+                  ...ratings,
+                  tfIdf: updateRatings(ratings.tfIdf, numChosen, 0),
+                })
               }
             ></VerticalSlider>
             <VerticalSlider
               onSetSlider={(numChosen) =>
-                setRatings({ ...ratings, tfIdf2: Number.parseInt(numChosen) })
+                setRatings({
+                  ...ratings,
+                  tfIdf: updateRatings(ratings.tfIdf, numChosen, 1),
+                })
               }
             ></VerticalSlider>{" "}
             <VerticalSlider
               onSetSlider={(numChosen) =>
-                setRatings({ ...ratings, tfIdf3: Number.parseInt(numChosen) })
+                setRatings({
+                  ...ratings,
+                  tfIdf: updateRatings(ratings.tfIdf, numChosen, 2),
+                })
               }
             ></VerticalSlider>{" "}
             <VerticalSlider
               onSetSlider={(numChosen) =>
-                setRatings({ ...ratings, tfIdf4: Number.parseInt(numChosen) })
+                setRatings({
+                  ...ratings,
+                  tfIdf: updateRatings(ratings.tfIdf, numChosen, 3),
+                })
               }
             ></VerticalSlider>{" "}
             <VerticalSlider
               onSetSlider={(numChosen) =>
-                setRatings({ ...ratings, tfIdf5: Number.parseInt(numChosen) })
+                setRatings({
+                  ...ratings,
+                  tfIdf: updateRatings(ratings.tfIdf, numChosen, 4),
+                })
               }
             ></VerticalSlider>
           </Row>
@@ -233,27 +256,42 @@ export const Survey = () => {
           <Row>
             <VerticalSlider
               onSetSlider={(numChosen) =>
-                setRatings({ ...ratings, doc2vec: Number.parseInt(numChosen) })
+                setRatings({
+                  ...ratings,
+                  doc2vec: updateRatings(ratings.doc2vec, numChosen, 0),
+                })
               }
             ></VerticalSlider>
             <VerticalSlider
               onSetSlider={(numChosen) =>
-                setRatings({ ...ratings, doc2vec2: Number.parseInt(numChosen) })
+                setRatings({
+                  ...ratings,
+                  doc2vec: updateRatings(ratings.doc2vec, numChosen, 1),
+                })
               }
             ></VerticalSlider>{" "}
             <VerticalSlider
               onSetSlider={(numChosen) =>
-                setRatings({ ...ratings, doc2vec3: Number.parseInt(numChosen) })
+                setRatings({
+                  ...ratings,
+                  doc2vec: updateRatings(ratings.doc2vec, numChosen, 2),
+                })
               }
             ></VerticalSlider>{" "}
             <VerticalSlider
               onSetSlider={(numChosen) =>
-                setRatings({ ...ratings, doc2vec4: Number.parseInt(numChosen) })
+                setRatings({
+                  ...ratings,
+                  doc2vec: updateRatings(ratings.doc2vec, numChosen, 3),
+                })
               }
             ></VerticalSlider>{" "}
             <VerticalSlider
               onSetSlider={(numChosen) =>
-                setRatings({ ...ratings, doc2vec5: Number.parseInt(numChosen) })
+                setRatings({
+                  ...ratings,
+                  doc2vec: updateRatings(ratings.doc2vec, numChosen, 4),
+                })
               }
             ></VerticalSlider>
           </Row>
