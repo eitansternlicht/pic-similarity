@@ -72,7 +72,10 @@ export default function VerticalSlider({ onSetSlider }) {
           defaultValue={[5]}
           aria-labelledby="vertical-slider"
           getAriaValueText={valuetext}
-          onChange={(val) => onSetSlider(val.target.ariaValueText)}
+          onChange={(val) => {
+            console.log(val.target.ariaValueText);
+            onSetSlider(Number.parseInt(val.target.ariaValueText));
+          }}
           marks={marks}
           min={0}
           max={10}
