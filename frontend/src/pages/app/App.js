@@ -10,9 +10,9 @@ import { SERVER_PORT } from '../../utils/consts';
 import Spinner from 'react-bootstrap/Spinner';
 import axios from 'axios';
 import firebase from '../../config/firebase';
-import { lens } from '../../utils/func-utils';
 
 const SERVER_URL = `http://localhost:${SERVER_PORT}/upload`;
+const db = firebase.firestore();
 
 const App = () => {
     const [imageDescriptions, setImageDescriptions] = useState('');
@@ -22,7 +22,6 @@ const App = () => {
     const [error, setError] = useState(false);
     const [clearScreen, setClearScreen] = useState(false);
     const [imageInputRef, setImageInputRef] = useState('');
-    const db = firebase.firestore();
 
     const getURL = hit => {
         const { image_path, labelAnnotations } = hit._source;

@@ -1,7 +1,6 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 import React, { useState } from 'react';
-import { lens, updateArray } from '../../utils/func-utils';
 
 import Button from 'react-bootstrap/Button';
 import Card from 'react-bootstrap/Card';
@@ -13,6 +12,9 @@ import VerticalSlider from '../../components/vertical-slider/VerticalSlider';
 import axios from 'axios';
 import firebase from '../../config/firebase';
 import { toImageURL } from '../../utils/app-utils';
+import { updateArray } from '../../utils/func-utils';
+
+const db = firebase.firestore();
 
 const Survey = () => {
     const [imageDescriptions, setImageDescriptions] = useState('');
@@ -21,13 +23,9 @@ const Survey = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(false);
     const [queryTime, setQueryTime] = useState({ tfIdf: null, doc2vec: null });
-    const [ratings, setRatings] = useState({
-        tfIdf: [5, 5, 5, 5, 5],
-        doc2vec: [5, 5, 5, 5, 5]
-    });
+    const [ratings, setRatings] = useState(null);
     const [clearScreen, setClearScreen] = useState(false);
     const [imageInputRef, setImageInputRef] = useState('');
-    const db = firebase.firestore();
 
     const onClickGetSimilar = () => {
         setClearScreen(false);
@@ -43,7 +41,7 @@ const Survey = () => {
                     tfIdf: tfIdf.body.took,
                     doc2vec: doc2vec.body.took
                 });
-                setSearchImage(toImageURL(searchedImage.body._source.image_path));
+                setSearchImage(toImageURL(searchedImage.body.hits.hits[0]._source.image_path));
 
                 const doc2vecResults = doc2vec.body.hits.hits;
 
@@ -52,6 +50,10 @@ const Survey = () => {
                     setResults({
                         tfIdf: tfIdfResults,
                         doc2vec: doc2vecResults
+                    });
+                    setRatings({
+                        tfIdf: tfIdfResults.map(res => ({ similarityScore: res._score, rating: 5 })),
+                        doc2vec: doc2vecResults.map(res => ({ similarityScore: res._score, rating: 5 }))
                     });
                     setImageDescriptions(
                         tfIdfResults[0]._source.labelAnnotations
@@ -100,7 +102,7 @@ const Survey = () => {
                 setImageDescriptions(null);
                 setResults([]);
                 setSearchImage(null);
-                setRatings({ tfIdf: [5, 5, 5, 5, 5], doc2vec: [5, 5, 5, 5, 5] });
+                setRatings(null);
                 setError(false);
                 setQueryTime({ tfIdf: null, doc2vec: null });
                 imageInputRef.value = null;
@@ -136,7 +138,7 @@ const Survey = () => {
                             </Card.Body>
                         </Card>
                     ) : null}
-                    <h4>tfIdf results</h4>
+                    <h2>tfIdf results</h2>
                     <Row>
                         {results.tfIdf.map(hit => {
                             const { image_path, labelAnnotations } = hit._source;
@@ -159,48 +161,22 @@ const Survey = () => {
                         })}
                     </Row>
                     <Row>
-                        <VerticalSlider
-                            onSetSlider={numChosen =>
-                                setRatings({
-                                    ...ratings,
-                                    tfIdf: updateArray(ratings.tfIdf, 0, numChosen)
-                                })
-                            }
-                        ></VerticalSlider>
-                        <VerticalSlider
-                            onSetSlider={numChosen =>
-                                setRatings({
-                                    ...ratings,
-                                    tfIdf: updateArray(ratings.tfIdf, 1, numChosen)
-                                })
-                            }
-                        ></VerticalSlider>{' '}
-                        <VerticalSlider
-                            onSetSlider={numChosen =>
-                                setRatings({
-                                    ...ratings,
-                                    tfIdf: updateArray(ratings.tfIdf, 2, numChosen)
-                                })
-                            }
-                        ></VerticalSlider>{' '}
-                        <VerticalSlider
-                            onSetSlider={numChosen =>
-                                setRatings({
-                                    ...ratings,
-                                    tfIdf: updateArray(ratings.tfIdf, 3, numChosen)
-                                })
-                            }
-                        ></VerticalSlider>{' '}
-                        <VerticalSlider
-                            onSetSlider={numChosen =>
-                                setRatings({
-                                    ...ratings,
-                                    tfIdf: updateArray(ratings.tfIdf, 4, numChosen)
-                                })
-                            }
-                        ></VerticalSlider>
+                        {results.tfIdf.map((tfIdfResult, index) => (
+                            <VerticalSlider
+                                key={`tfIdf-result-${index}`}
+                                onSetSlider={numChosen =>
+                                    setRatings({
+                                        ...ratings,
+                                        tfIdf: updateArray(ratings.tfIdf, index, {
+                                            rating: numChosen,
+                                            similarityScore: tfIdfResult._score
+                                        })
+                                    })
+                                }
+                            ></VerticalSlider>
+                        ))}
                     </Row>
-                    <h4>doc2vec results</h4>
+                    <h2>doc2vec results</h2>
                     <Row>
                         {results.doc2vec.map(hit => {
                             const { image_path, labelAnnotations } = hit._source;
@@ -222,46 +198,20 @@ const Survey = () => {
                         })}
                     </Row>
                     <Row>
-                        <VerticalSlider
-                            onSetSlider={numChosen =>
-                                setRatings({
-                                    ...ratings,
-                                    doc2vec: updateArray(ratings.doc2vec, 0, numChosen)
-                                })
-                            }
-                        ></VerticalSlider>
-                        <VerticalSlider
-                            onSetSlider={numChosen =>
-                                setRatings({
-                                    ...ratings,
-                                    doc2vec: updateArray(ratings.doc2vec, 1, numChosen)
-                                })
-                            }
-                        ></VerticalSlider>{' '}
-                        <VerticalSlider
-                            onSetSlider={numChosen =>
-                                setRatings({
-                                    ...ratings,
-                                    doc2vec: updateArray(ratings.doc2vec, 2, numChosen)
-                                })
-                            }
-                        ></VerticalSlider>{' '}
-                        <VerticalSlider
-                            onSetSlider={numChosen =>
-                                setRatings({
-                                    ...ratings,
-                                    doc2vec: updateArray(ratings.doc2vec, 0, numChosen)
-                                })
-                            }
-                        ></VerticalSlider>{' '}
-                        <VerticalSlider
-                            onSetSlider={numChosen =>
-                                setRatings({
-                                    ...ratings,
-                                    doc2vec: updateArray(ratings.doc2vec, 3, numChosen)
-                                })
-                            }
-                        ></VerticalSlider>
+                        {results.doc2vec.map((doc2vecResult, index) => (
+                            <VerticalSlider
+                                key={`tfIdf-result-${index}`}
+                                onSetSlider={numChosen =>
+                                    setRatings({
+                                        ...ratings,
+                                        doc2vec: updateArray(ratings.doc2vec, index, {
+                                            rating: numChosen,
+                                            similarityScore: doc2vecResult._score
+                                        })
+                                    })
+                                }
+                            ></VerticalSlider>
+                        ))}
                     </Row>
                     <Button varient="primary" onClick={addVoteToFirebase} type="submit">
                         Submit
