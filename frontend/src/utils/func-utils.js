@@ -5,3 +5,18 @@ export const updateArray = (array, indexToSet, valueToSet) => {
     newArray[indexToSet] = valueToSet;
     return newArray;
 };
+
+export const roundTo10 = number => (number === 100 ? 90 : Math.round(number / 10) * 10);
+
+export const mapValues = (f, obj) => Object.fromEntries(Object.entries(obj).map(([key, val]) => [key, f(val)]));
+
+export const average = arrayOfNums => {
+    if (!arrayOfNums) {
+        return undefined;
+    }
+    let total = 0;
+    for (var i = 0; i < arrayOfNums.length; i++) {
+        total += arrayOfNums[i];
+    }
+    return total / arrayOfNums.length;
+};

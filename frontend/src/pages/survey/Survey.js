@@ -1,6 +1,7 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 import React, { useState } from 'react';
+import { toImageURL, toPercentage } from '../../utils/app-utils';
 
 import Button from 'react-bootstrap/Button';
 import Card from 'react-bootstrap/Card';
@@ -11,7 +12,6 @@ import Spinner from 'react-bootstrap/Spinner';
 import VerticalSlider from '../../components/vertical-slider/VerticalSlider';
 import axios from 'axios';
 import firebase from '../../config/firebase';
-import { toImageURL } from '../../utils/app-utils';
 import { updateArray } from '../../utils/func-utils';
 
 const db = firebase.firestore();
@@ -52,8 +52,8 @@ const Survey = () => {
                         doc2vec: doc2vecResults
                     });
                     setRatings({
-                        tfIdf: tfIdfResults.map(res => ({ similarityScore: res._score, rating: 5 })),
-                        doc2vec: doc2vecResults.map(res => ({ similarityScore: res._score, rating: 5 }))
+                        tfIdf: tfIdfResults.map(res => ({ similarityScore: toPercentage(res._score), rating: 5 })),
+                        doc2vec: doc2vecResults.map(res => ({ similarityScore: toPercentage(res._score), rating: 5 }))
                     });
                     setImageDescriptions(
                         tfIdfResults[0]._source.labelAnnotations
@@ -152,7 +152,7 @@ const Survey = () => {
                                 <Card key={image_path} style={{ width: '18rem' }}>
                                     <Card.Img variant="top" src={url} />
                                     <Card.Body>
-                                        <Card.Title>Score: {Math.round((hit._score - 1) * 100)}%</Card.Title>
+                                        <Card.Title>Score: {toPercentage(hit._score)}%</Card.Title>
                                         <Card.Title>Lables</Card.Title>
                                         <Card.Text>{descriptionString}</Card.Text>
                                     </Card.Body>
@@ -169,7 +169,7 @@ const Survey = () => {
                                         ...ratings,
                                         tfIdf: updateArray(ratings.tfIdf, index, {
                                             rating: numChosen,
-                                            similarityScore: tfIdfResult._score
+                                            similarityScore: toPercentage(tfIdfResult._score)
                                         })
                                     })
                                 }
@@ -189,7 +189,7 @@ const Survey = () => {
                                 <Card key={image_path} style={{ width: '18rem' }}>
                                     <Card.Img variant="top" src={url} />
                                     <Card.Body>
-                                        <Card.Title>Score: {Math.round((hit._score - 1) * 100)}%</Card.Title>
+                                        <Card.Title>Score: {toPercentage(hit._score)}%</Card.Title>
                                         <Card.Title>Lables</Card.Title>
                                         <Card.Text>{descriptionString}</Card.Text>
                                     </Card.Body>
@@ -206,7 +206,7 @@ const Survey = () => {
                                         ...ratings,
                                         doc2vec: updateArray(ratings.doc2vec, index, {
                                             rating: numChosen,
-                                            similarityScore: doc2vecResult._score
+                                            similarityScore: toPercentage(doc2vecResult._score)
                                         })
                                     })
                                 }
