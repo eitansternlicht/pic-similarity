@@ -1,0 +1,34 @@
+{
+    "labels": {
+        "mappings": {
+            "properties": {
+                "image_path": {
+                    "type": "keyword"
+                },
+                "labelAnnotations": {
+                    "properties": {
+                        "description": {
+                            "type": "text"
+                        },
+                        "mid": {
+                            "type": "text"
+                        },
+                        "score": {
+                            "type": "float"
+                        },
+                        "topicality": {
+                            "type": "float"
+                        }
+                    }
+                },
+                "tfIdf_vector": {
+                    "type": "sparse_vector"
+                },
+                "doc2vec_vector": {
+                    "type": "dense_vector",
+                    "dims": 50
+                }
+            }
+        }
+    }
+}
