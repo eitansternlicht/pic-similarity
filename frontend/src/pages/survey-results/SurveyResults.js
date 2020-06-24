@@ -17,19 +17,23 @@ const SurveyResults = () => {
         db.collection('scores')
             .get()
             .then(results => {
-                setScores(results.docs.map(d => d.data()));
+                const s = results.docs.map(d => d.data());
+                console.log('scoressss', s);
+                setScores(s);
             });
     }, []);
     return scores ? (
         <>
             <div>Number of surveys: {scores.length}</div>
             <div>
-                TF-IDF average user rating:{' '}
-                {average(scores.flatMap(score => score.tfIdf.results.map(res => res.userRating.rating))).toFixed(1)}
+                {'TF-IDF average user rating: ' +
+                    average(scores.flatMap(score => score.tfIdf.results.map(res => res.userRating.rating))).toFixed(1)}
             </div>
             <div>
-                Doc2Vec average user rating:{' '}
-                {average(scores.flatMap(score => score.doc2vec.results.map(res => res.userRating.rating))).toFixed(1)}
+                {'Doc2Vec average user rating: ' +
+                    average(scores.flatMap(score => score.doc2vec.results.map(res => res.userRating.rating))).toFixed(
+                        1
+                    )}
             </div>
             <ScatterChartGoogleVision docs={scores} />
             <ChartAverageRating docs={scores} />

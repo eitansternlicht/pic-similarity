@@ -18,6 +18,9 @@ export const similarityToUserRatings = (similarityAlgorithm, docs) => {
     for (const doc of docs) {
         for (const res of doc[similarityAlgorithm].results) {
             const rounded = roundTo10(res.userRating.similarityScore);
+            if (rounded === 100) {
+                console.log('100', res.userRating.similarityScore);
+            }
             if (rounded in results) {
                 results[rounded].push(res.userRating.rating);
             } else {
@@ -25,6 +28,7 @@ export const similarityToUserRatings = (similarityAlgorithm, docs) => {
             }
         }
     }
+    console.log('results', results);
     return results;
 };
 
