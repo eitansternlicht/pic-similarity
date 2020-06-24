@@ -77,7 +77,7 @@ const App = () => {
     };
 
     return (
-        <Container>
+        <Container fluid>
             <h1>Pic Similarity Service</h1>
             <h2>Upload Image</h2>
             <input
@@ -99,7 +99,7 @@ const App = () => {
             {loading ? <Spinner animation="border" /> : null}
 
             {!error && !loading && results.tfIdf.length > 0 && results.doc2vec.length > 0 && !clearScreen ? (
-                <Container>
+                <Container fluid>
                     {imageDescriptions && !clearScreen ? (
                         <Card style={{ width: '18rem' }}>
                             <Card.Img variant="top" src={getURL(results.searchedImage._source.image_path)} />
