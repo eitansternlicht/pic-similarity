@@ -22,7 +22,6 @@ const SurveyResults = () => {
     }, []);
     return scores ? (
         <>
-            {' '}
             <div>Number of surveys: {scores.length}</div>
             <div>
                 TF-IDF average user rating:{' '}
