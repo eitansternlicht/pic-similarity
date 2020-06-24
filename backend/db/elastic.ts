@@ -12,7 +12,6 @@ const querySimilarity = (
     queryVector: any
 ) => {
     const source = `${elasticSimilarityFunction}(params.queryVector, doc['${elasticDocVectorFieldName}']) + 1.0`;
-    console.log('source: ', source);
     return client.search({
         index: ELASTIC_DB_NAME,
         size,

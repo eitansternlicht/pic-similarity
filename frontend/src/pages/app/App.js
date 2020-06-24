@@ -119,7 +119,6 @@ const App = () => {
                             });
                             const descriptionString = descriptions.join(', ');
                             const url = `http://localhost:${SERVER_PORT}/image-storage/${image_path}`;
-                            console.log('url', url);
                             return (
                                 <Card style={{ width: '18rem' }}>
                                     <Card.Img variant="top" src={url} />
@@ -142,7 +141,6 @@ const App = () => {
                             });
                             const descriptionString = descriptions.join(', ');
                             const url = `http://localhost:${SERVER_PORT}/image-storage/${image_path}`;
-                            console.log('url', url);
                             return (
                                 <Card style={{ width: '18rem' }}>
                                     <Card.Img variant="top" src={url} />

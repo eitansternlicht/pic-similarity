@@ -27,3 +27,11 @@ export const similarityToUserRatings = (similarityAlgorithm, docs) => {
     }
     return results;
 };
+
+export const docToGoogleVisionConfidence = similarityAlgorithm => doc => {
+    const searchedImageConf = average(doc.searchedImage.labelAnnotations.map(a => a.score));
+    return doc[similarityAlgorithm].results.map(res => ({
+        x: (average(res.labelAnnotations.map(a => a.score)) * searchedImageConf * 100).toFixed(1),
+        y: res.userRating.rating
+    }));
+};
