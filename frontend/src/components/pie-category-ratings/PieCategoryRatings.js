@@ -3,25 +3,11 @@ import React from 'react';
 import { frequencies } from '../../utils/func-utils';
 import { similarityToUserRatings } from '../../utils/chart-utils';
 
-// const data = {
-//     categories: Object.values(categories).sort(),
-//     series: [
-//         {
-//             name: 'TF-IDF',
-//             data: [2, 2, 3, 4, 5, 6, 7, 8, 9, 7]
-//         },
-//         {
-//             name: 'Doc2Vec',
-//             data: [2, 2, undefined, 4, 5, 6, 5, 8, 9, 4]
-//         }
-//     ]
-// };
-
 const toOptions = algorithmTitle => ({
     chart: {
         width: 500,
         height: 400,
-        title: `${algorithmTitle} User ratings with 80 - 100 similarity scores`
+        title: `${algorithmTitle} User ratings with similarity scores`
     },
     series: {
         showLegend: true,
@@ -29,25 +15,22 @@ const toOptions = algorithmTitle => ({
     }
 });
 
-export const toData = (similarityAlgorithm, scoresDocs) => {
-    const ranges = [80, 90];
+export const toData = (similarityAlgorithm, scoresDocs, range) => {
     const totalRatings = [];
-    for (const range of ranges) {
-        const rangeRatings = similarityToUserRatings(similarityAlgorithm, scoresDocs)[range];
+    for (let i = range[0]; i < range[1]; i += 10) {
+        const rangeRatings = similarityToUserRatings(similarityAlgorithm, scoresDocs)[i];
         if (rangeRatings) {
             totalRatings.push(...rangeRatings);
         }
     }
 
     const series = Object.entries(frequencies(totalRatings)).map(([key, val]) => ({ name: key, data: val }));
-
     return {
-        categories: ['80 - 100'],
         series
     };
 };
 
-const PieCategoryRatings = ({ algorithmTitle, docs, similarityAlgorithm }) => (
-    <PieChart data={toData(similarityAlgorithm, docs)} options={toOptions(algorithmTitle)} />
+const PieCategoryRatings = ({ algorithmTitle, docs, similarityAlgorithm, range }) => (
+    <PieChart data={toData(similarityAlgorithm, docs, range)} options={toOptions(algorithmTitle)} />
 );
 export default PieCategoryRatings;
