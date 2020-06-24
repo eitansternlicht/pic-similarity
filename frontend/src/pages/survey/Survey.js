@@ -115,10 +115,56 @@ const Survey = () => {
 
     return (
         <Container fluid>
-            <h1>Pic Similarity Service - Survey</h1>
-            <Button varient="primary" onClick={onClickGetSimilar} type="submit" style={{ marginRight: 10 }}>
-                Get Random
-            </Button>
+            <div
+                style={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    paddingTop: 50
+                }}
+            >
+                <h1>Survey</h1>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                <h3>Please press the 'Get Random' button to get a set of pics </h3>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: 40 }}>
+                <h3>Instructions</h3>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                <h4>When answering the survey, Please take in consideration the following questions:</h4>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                <h4>How much are the objects in the pictures are similiar to the searched image?</h4>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                <h4>How much are the background of the pictures are similiar to the searched image?</h4>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                <h4>How much are the colors of the pictures are similiar to the searched image?</h4>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                <h4>
+                    How much does the situation/senrio in the pictures are similiar to the one in the searched image?
+                </h4>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                <h4>
+                    How much does the percentage score that displayed under each pictures represents the similarity to
+                    the searched image?
+                </h4>
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                <Button
+                    varient="primary"
+                    onClick={onClickGetSimilar}
+                    type="submit"
+                    style={{ marginTop: 30, marginBottom: 30 }}
+                >
+                    Get Random
+                </Button>
+            </div>
             {loading ? <Spinner animation="border" /> : null}
 
             {!error &&
@@ -130,16 +176,28 @@ const Survey = () => {
             !clearScreen ? (
                 <Container fluid>
                     {imageDescriptions && !clearScreen ? (
-                        <Card style={{ width: '18rem' }}>
-                            <Card.Img variant="top" src={searchImage} />
-                            <Card.Body>
-                                <Card.Title>Search Image</Card.Title>
-                                <Card.Text>{imageDescriptions}</Card.Text>
-                            </Card.Body>
-                        </Card>
+                        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                            <Card style={{ width: '18rem' }}>
+                                <Card.Img variant="top" src={searchImage} />
+                                <Card.Body>
+                                    <Card.Title>Search Image</Card.Title>
+                                    <Card.Text>{imageDescriptions}</Card.Text>
+                                </Card.Body>
+                            </Card>
+                        </div>
                     ) : null}
-                    <h2>tfIdf results</h2>
-                    <Row>
+                    <div
+                        style={{
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            marginTop: 50,
+                            marginBottom: 50
+                        }}
+                    >
+                        <h1>tfIdf results</h1>
+                    </div>
+                    <Row className="justify-content-md-center">
                         {results.tfIdf.map(hit => {
                             const { image_path, labelAnnotations } = hit._source;
 
@@ -149,35 +207,49 @@ const Survey = () => {
                             const descriptionString = descriptions.join(', ');
                             const url = toImageURL(image_path);
                             return (
-                                <Card key={image_path} style={{ width: '18rem' }}>
-                                    <Card.Img variant="top" src={url} />
-                                    <Card.Body>
-                                        <Card.Title>Score: {toPercentage(hit._score)}%</Card.Title>
-                                        <Card.Title>Lables</Card.Title>
-                                        <Card.Text>{descriptionString}</Card.Text>
-                                    </Card.Body>
-                                </Card>
+                                <div style={{ marginRight: 50 }}>
+                                    <Card key={image_path} style={{ width: '18rem' }}>
+                                        <Card.Img variant="top" src={url} />
+                                        <Card.Body>
+                                            <Card.Title>Score: {toPercentage(hit._score)}%</Card.Title>
+                                            <Card.Title>Lables</Card.Title>
+                                            <Card.Text>{descriptionString}</Card.Text>
+                                        </Card.Body>
+                                    </Card>
+                                </div>
                             );
                         })}
                     </Row>
-                    <Row>
+                    <Row className="justify-content-md-center">
                         {results.tfIdf.map((tfIdfResult, index) => (
-                            <VerticalSlider
-                                key={`tfIdf-result-${index}`}
-                                onSetSlider={numChosen =>
-                                    setRatings({
-                                        ...ratings,
-                                        tfIdf: updateArray(ratings.tfIdf, index, {
-                                            rating: numChosen,
-                                            similarityScore: toPercentage(tfIdfResult._score)
+                            <div style={{ paddingLeft: 150, paddingRight: 150 }}>
+                                <VerticalSlider
+                                    key={`tfIdf-result-${index}`}
+                                    onSetSlider={numChosen =>
+                                        setRatings({
+                                            ...ratings,
+                                            tfIdf: updateArray(ratings.tfIdf, index, {
+                                                rating: numChosen,
+                                                similarityScore: toPercentage(tfIdfResult._score)
+                                            })
                                         })
-                                    })
-                                }
-                            ></VerticalSlider>
+                                    }
+                                ></VerticalSlider>
+                            </div>
                         ))}
                     </Row>
-                    <h2>doc2vec results</h2>
-                    <Row>
+                    <div
+                        style={{
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            marginTop: 50,
+                            marginBottom: 50
+                        }}
+                    >
+                        <h2>doc2vec results</h2>
+                    </div>
+                    <Row className="justify-content-md-center">
                         {results.doc2vec.map(hit => {
                             const { image_path, labelAnnotations } = hit._source;
                             const descriptions = labelAnnotations.map(annotation => {
@@ -186,36 +258,42 @@ const Survey = () => {
                             const descriptionString = descriptions.join(', ');
                             const url = `${SERVER_URL}/image-storage/${image_path}`;
                             return (
-                                <Card key={image_path} style={{ width: '18rem' }}>
-                                    <Card.Img variant="top" src={url} />
-                                    <Card.Body>
-                                        <Card.Title>Score: {toPercentage(hit._score)}%</Card.Title>
-                                        <Card.Title>Lables</Card.Title>
-                                        <Card.Text>{descriptionString}</Card.Text>
-                                    </Card.Body>
-                                </Card>
+                                <div style={{ marginRight: 50 }}>
+                                    <Card key={image_path} style={{ width: '18rem' }}>
+                                        <Card.Img variant="top" src={url} />
+                                        <Card.Body>
+                                            <Card.Title>Score: {toPercentage(hit._score)}%</Card.Title>
+                                            <Card.Title>Lables</Card.Title>
+                                            <Card.Text>{descriptionString}</Card.Text>
+                                        </Card.Body>
+                                    </Card>
+                                </div>
                             );
                         })}
                     </Row>
-                    <Row>
+                    <Row className="justify-content-md-center">
                         {results.doc2vec.map((doc2vecResult, index) => (
-                            <VerticalSlider
-                                key={`tfIdf-result-${index}`}
-                                onSetSlider={numChosen =>
-                                    setRatings({
-                                        ...ratings,
-                                        doc2vec: updateArray(ratings.doc2vec, index, {
-                                            rating: numChosen,
-                                            similarityScore: toPercentage(doc2vecResult._score)
+                            <div style={{ paddingLeft: 150, paddingRight: 150 }}>
+                                <VerticalSlider
+                                    key={`tfIdf-result-${index}`}
+                                    onSetSlider={numChosen =>
+                                        setRatings({
+                                            ...ratings,
+                                            doc2vec: updateArray(ratings.doc2vec, index, {
+                                                rating: numChosen,
+                                                similarityScore: toPercentage(doc2vecResult._score)
+                                            })
                                         })
-                                    })
-                                }
-                            ></VerticalSlider>
+                                    }
+                                ></VerticalSlider>
+                            </div>
                         ))}
                     </Row>
-                    <Button varient="primary" onClick={addVoteToFirebase} type="submit">
-                        Submit
-                    </Button>
+                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', paddingBottom: 50 }}>
+                        <Button varient="primary" onClick={addVoteToFirebase} type="submit">
+                            Submit
+                        </Button>
+                    </div>
                 </Container>
             ) : clearScreen ? (
                 <>
