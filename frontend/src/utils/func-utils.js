@@ -20,3 +20,15 @@ export const average = arrayOfNums => {
     }
     return total / arrayOfNums.length;
 };
+
+export const frequencies = array => {
+    const map = {};
+    for (const elem of array) {
+        if (map.hasOwnProperty(elem)) {
+            map[elem]++;
+        } else {
+            map[elem] = 1;
+        }
+    }
+    return map;
+};

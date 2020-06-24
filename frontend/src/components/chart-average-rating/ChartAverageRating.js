@@ -12,7 +12,7 @@ import React from 'react';
 //             data: [2, 2, 3, 4, 5, 6, 7, 8, 9, 7]
 //         },
 //         {
-//             name: 'Word2Vec',
+//             name: 'Doc2Vec',
 //             data: [2, 2, undefined, 4, 5, 6, 5, 8, 9, 4]
 //         }
 //     ]
@@ -22,10 +22,10 @@ const options = {
     chart: {
         width: 800,
         height: 450,
-        title: 'User Ratings vs Similarity scores'
+        title: 'Average User Rating vs Similarity scores'
     },
     yAxis: {
-        title: 'Average User Ratings',
+        title: 'Average User Rating',
         min: 0,
         max: 10
     },
@@ -33,27 +33,26 @@ const options = {
         title: 'Similarity score',
         min: 0,
         max: 10
-    },
-    series: {
-        // showLabel: true
     }
 };
 
 export const toData = scoresDocs => {
-    const res = similarityToUserRatings('tfIdf', scoresDocs);
-    const resWithAverage = mapValues(average, res);
-    const r = Object.values({ ...mapValues(_ => undefined, categoriesByTen), ...resWithAverage });
-    // return data;
     return {
         categories: Object.values(categoriesByTen).sort(),
         series: [
             {
                 name: 'TF-IDF',
-                data: r
+                data: Object.values({
+                    ...mapValues(_ => undefined, categoriesByTen),
+                    ...mapValues(val => average(val).toFixed(1), similarityToUserRatings('tfIdf', scoresDocs))
+                })
             },
             {
-                name: 'Word2Vec',
-                data: [2, 2, 3, 4, 5, 6, 5, 8, 9, 4]
+                name: 'Doc2Vec',
+                data: Object.values({
+                    ...mapValues(_ => undefined, categoriesByTen),
+                    ...mapValues(val => average(val).toFixed(1), similarityToUserRatings('doc2vec', scoresDocs))
+                })
             }
         ]
     };

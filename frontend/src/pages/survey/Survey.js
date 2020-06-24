@@ -41,7 +41,7 @@ const Survey = () => {
                     tfIdf: tfIdf.body.took,
                     doc2vec: doc2vec.body.took
                 });
-                setSearchImage(toImageURL(searchedImage.body.hits.hits[0]._source.image_path));
+                setSearchImage(searchedImage.body.hits.hits[0]._source);
 
                 const doc2vecResults = doc2vec.body.hits.hits;
 
@@ -106,7 +106,6 @@ const Survey = () => {
                 setError(false);
                 setQueryTime({ tfIdf: null, doc2vec: null });
                 imageInputRef.value = null;
-                console.log(res);
             })
             .catch(err => {
                 setError(err);
@@ -131,7 +130,7 @@ const Survey = () => {
                 <Container fluid>
                     {imageDescriptions && !clearScreen ? (
                         <Card style={{ width: '18rem' }}>
-                            <Card.Img variant="top" src={searchImage} />
+                            <Card.Img variant="top" src={toImageURL(searchImage.image_path)} />
                             <Card.Body>
                                 <Card.Title>Search Image</Card.Title>
                                 <Card.Text>{imageDescriptions}</Card.Text>
