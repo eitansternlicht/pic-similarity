@@ -25,14 +25,14 @@ const useStyles = makeStyles({
     }
 });
 
-const HoverRating = ({ rating, setRating }) => {
+const HoverRating = ({ rating, setRating, ratingName }) => {
     const [hover, setHover] = React.useState(-1);
     const classes = useStyles();
 
     return (
         <div className={classes.root}>
             <Rating
-                name="hover-feedback"
+                name={ratingName}
                 value={rating}
                 precision={0.5}
                 onChange={(_, newValue) => {
