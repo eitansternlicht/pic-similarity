@@ -26,6 +26,9 @@ const Survey = () => {
     const [clearScreen, setClearScreen] = useState(false);
     const [resultIndex, setResultIndex] = useState(null);
     const [objectsRating, setObjectsRating] = useState(2.5);
+    const [backgroundRating, setBackgroundRating] = useState(2.5);
+    const [scoreRating, setScoreRating] = useState(2.5);
+    const [senrioRating, setSenrioRating] = useState(2.5);
 
     const onClickGetSimilar = () => {
         setClearScreen(false);
@@ -41,13 +44,19 @@ const Survey = () => {
                 const sortedResults = tfIdfResults
                     .map(result => ({
                         algorithm: 'tfIdf',
-                        userRating: { rating: 5, similarityScore: toPercentage(result._score) },
+                        userRating: {
+                            ratings: { objectsRating: 5, backgroundRating: 5, scoreRating: 5, senrioRating: 5 },
+                            similarityScore: toPercentage(result._score)
+                        },
                         result
                     }))
                     .concat(
                         doc2vecResults.map(result => ({
                             algorithm: 'doc2vec',
-                            userRating: { rating: 5, similarityScore: toPercentage(result._score) },
+                            userRating: {
+                                ratings: { objectsRating: 5, backgroundRating: 5, scoreRating: 5, senrioRating: 5 },
+                                similarityScore: toPercentage(result._score)
+                            },
                             result
                         }))
                     )
@@ -251,25 +260,72 @@ const Survey = () => {
                                 </Card> */}
                             </img>
                         ) : null}
+                        <div>
+                            <h6>objects Rating</h6>
+                            <div style={{ width: '20vw', paddingLeft: '20px' }}>
+                                <HoverRating
+                                    ratingName={'objectsRating'}
+                                    rating={objectsRating}
+                                    setRating={newRating => {
+                                        const newResults = [...results];
+                                        newResults[resultIndex].userRating.ratings.objectsRating = Math.floor(
+                                            newRating * 2
+                                        );
+                                        setResults(newResults);
+                                        setObjectsRating(newRating);
+                                    }}
+                                />
+                            </div>
+                            <h6>background {'&'} color Rating</h6>
 
-                        <div style={{ width: '20vw', paddingLeft: '20px' }}>
-                            <HoverRating
-                                rating={objectsRating}
-                                setRating={newRating => {
-                                    setObjectsRating(newRating);
-                                    const newResults = [...results];
-                                    newResults[resultIndex].userRating.rating = Math.floor(newRating * 2);
-                                    setResults(newResults);
-                                }}
-                            />
-                            {/* <VerticalSlider
-                                key={`result-${resultIndex}`}
-                                onSetSlider={numChosen => {
-                                    const newResults = [...results];
-                                    newResults[resultIndex].userRating.rating = numChosen;
-                                    setResults(newResults);
-                                }}
-                            ></VerticalSlider> */}
+                            <div style={{ width: '20vw', paddingLeft: '20px' }}>
+                                <HoverRating
+                                    ratingName={'backgroundRating'}
+                                    rating={backgroundRating}
+                                    setRating={newRating => {
+                                        const newResults = [...results];
+                                        newResults[resultIndex].userRating.ratings.backgroundRating = Math.floor(
+                                            newRating * 2
+                                        );
+                                        setResults(newResults);
+                                        setBackgroundRating(newRating);
+                                        console.log('new rating', newRating);
+                                        console.log('objectsRating', objectsRating);
+                                    }}
+                                />
+                            </div>
+                            <h6>score Rating</h6>
+
+                            <div style={{ width: '20vw', paddingLeft: '20px' }}>
+                                <HoverRating
+                                    ratingName={'scoreRating'}
+                                    rating={scoreRating}
+                                    setRating={newRating => {
+                                        const newResults = [...results];
+                                        newResults[resultIndex].userRating.ratings.scoreRating = Math.floor(
+                                            newRating * 2
+                                        );
+                                        setResults(newResults);
+                                        setScoreRating(newRating);
+                                    }}
+                                />
+                            </div>
+                            <h6>situation/senrio Rating</h6>
+
+                            <div style={{ width: '20vw', paddingLeft: '20px' }}>
+                                <HoverRating
+                                    ratingName={'senrioRating'}
+                                    rating={senrioRating}
+                                    setRating={newRating => {
+                                        setSenrioRating(newRating);
+                                        const newResults = [...results];
+                                        newResults[resultIndex].userRating.ratings.senrioRating = Math.floor(
+                                            newRating * 2
+                                        );
+                                        setResults(newResults);
+                                    }}
+                                />
+                            </div>
                         </div>
                         {displayImage()}
                     </div>

@@ -9,6 +9,7 @@ import Navbar from 'react-bootstrap/Navbar';
 import React from 'react';
 import Survey from '../survey/Survey';
 import SurveyResults from '../survey-results/SurveyResults';
+import Performance from '../performance/Performance';
 
 const Main = () => {
     return (
@@ -21,6 +22,7 @@ const Main = () => {
                     <Nav.Link href="/app">App</Nav.Link>
                     <Nav.Link href="/survey">Survey</Nav.Link>
                     <Nav.Link href="/survey-results">Survey Results</Nav.Link>
+                    <Nav.Link href="/performance">Performance</Nav.Link>
                 </Nav>
             </Navbar>
             <Switch>
@@ -32,6 +34,9 @@ const Main = () => {
                 </Route>
                 <Route path="/survey-results">
                     <SurveyResults />
+                </Route>
+                <Route path="/performance">
+                    <Performance />
                 </Route>
                 <Route path="/">
                     <Home />
