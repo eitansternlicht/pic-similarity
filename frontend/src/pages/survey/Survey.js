@@ -6,13 +6,11 @@ import { toImageURL, toPercentage } from '../../utils/app-utils';
 import Button from 'react-bootstrap/Button';
 import Card from 'react-bootstrap/Card';
 import Container from 'react-bootstrap/Container';
-import Row from 'react-bootstrap/Row';
 import { SERVER_URL } from '../../utils/consts';
 import Spinner from 'react-bootstrap/Spinner';
 import VerticalSlider from '../../components/vertical-slider/VerticalSlider';
 import axios from 'axios';
 import firebase from '../../config/firebase';
-import { updateArray } from '../../utils/func-utils';
 
 const db = firebase.firestore();
 
@@ -24,9 +22,7 @@ const Survey = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(false);
     const [queryTime, setQueryTime] = useState({ tfIdf: null, doc2vec: null });
-    const [ratings, setRatings] = useState(null);
     const [clearScreen, setClearScreen] = useState(false);
-    const [imageInputRef, setImageInputRef] = useState('');
     const [resultIndex, setResultIndex] = useState(null);
 
     const onClickGetSimilar = () => {
@@ -140,10 +136,9 @@ const Survey = () => {
                 setImageDescriptions(null);
                 setResults(null);
                 setSearchImage(null);
-                setRatings(null);
+                setError(false);
                 setError(false);
                 setQueryTime({ tfIdf: null, doc2vec: null });
-                imageInputRef.value = null;
             })
             .catch(err => {
                 setError(err);

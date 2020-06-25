@@ -9,10 +9,9 @@ import Row from 'react-bootstrap/Row';
 import { SERVER_PORT } from '../../utils/consts';
 import Spinner from 'react-bootstrap/Spinner';
 import axios from 'axios';
-import firebase from '../../config/firebase';
+import { toImageURL } from '../../utils/app-utils';
 
 const SERVER_URL = `http://localhost:${SERVER_PORT}/upload`;
-const db = firebase.firestore();
 
 const App = () => {
     const [imageDescriptions, setImageDescriptions] = useState('');
@@ -23,13 +22,6 @@ const App = () => {
     const [clearScreen, setClearScreen] = useState(false);
     const [imageInputRef, setImageInputRef] = useState('');
 
-    const getURL = hit => {
-        const { image_path, labelAnnotations } = hit._source;
-        const descriptions = labelAnnotations.map(annotation => {
-            return annotation.description;
-        });
-        return `http://localhost:${SERVER_PORT}/image-storage/${image_path}`;
-    };
     const onChangeFilePicker = event => {
         setSearchImage(event.target.files[0]);
     };
@@ -102,7 +94,7 @@ const App = () => {
                 <Container fluid>
                     {imageDescriptions && !clearScreen ? (
                         <Card style={{ width: '18rem' }}>
-                            <Card.Img variant="top" src={getURL(results.searchedImage._source.image_path)} />
+                            <Card.Img variant="top" src={toImageURL(results.searchedImage._source.image_path)} />
                             <Card.Body>
                                 <Card.Title>Search Image</Card.Title>
                                 <Card.Text>{imageDescriptions}</Card.Text>

@@ -1,4 +1,4 @@
-import { average, mapValues, roundTo10 } from './func-utils';
+import { average, roundTo10 } from './func-utils';
 
 export const categoriesByTen = {
     0: '0 - 10',
