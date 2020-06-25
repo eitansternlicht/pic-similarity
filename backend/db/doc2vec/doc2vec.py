@@ -1,43 +1,32 @@
 import os
-import gensim
-import smart_open
+from gensim.models.doc2vec import TaggedDocument, Doc2Vec
+from gensim.utils import simple_preprocess
 import json
-# Set file names for train and test data
-# test_data_dir = os.path.join(gensim.__path__[0], 'test', 'test_data')
-# lee_train_file = os.path.join(test_data_dir, 'lee_background.cor')
-# lee_test_file = os.path.join(test_data_dir, 'lee.cor')
 
-lee_train_file = '../../server/doc2vecInputFile.txt'
+DOCS_TOKENS_FILE = 'doc-tokens.txt'
 
 
-def read_corpus(fname, tokens_only=False):
-    with smart_open.open(fname, encoding="iso-8859-1") as f:
-        for i, line in enumerate(f):
-            tokens = gensim.utils.simple_preprocess(line)
-            if tokens_only:
-                yield tokens
-            else:
-                # For training data, add tags
-                yield gensim.models.doc2vec.TaggedDocument(tokens, [i])
+def read_corpus(filename):
+    with open(filename) as f:
+        return [TaggedDocument(simple_preprocess(line), [i])
+                for i, line in enumerate(f)]
 
 
-train_corpus = list(read_corpus(lee_train_file))
-# test_corpus = list(read_corpus(lee_test_file, tokens_only=True))
-
-model = gensim.models.doc2vec.Doc2Vec(vector_size=50, min_count=2, epochs=40)
-model.build_vocab(train_corpus)
-model.train(train_corpus, total_examples=model.corpus_count,
-            epochs=model.epochs)
-
-with open("doc-vectors.json", "w") as f:
-    json.dump(list(map(lambda taggedDoc: model.infer_vector(
-        taggedDoc.words).tolist(), train_corpus)), f)
-# vector = model.infer_vector(['only', 'you', 'can', 'prevent', 'forest', 'fires'])
-# vector2 = model.infer_vector(['light', 'pattern', 'lighting', 'design', 'metal', 'ceiling'])
+def train(tagged_docs):
+    model = Doc2Vec(vector_size=300, min_count=1, epochs=200, window = 30, workers=8, dm=0, dbow_words=1)
+    model.build_vocab(tagged_docs)
+    model.train(tagged_docs, total_examples=model.corpus_count,
+                epochs=model.epochs)
+    return model
 
 
-# print(vector)
-# print(vector2)
+def write_doc_vectors(model, output_filename):
+    with open("doc-vectors.json", "w") as f:
+        json.dump([list(num.item() for num in model.docvecs[i])
+                   for i in range(len(model.docvecs))], f)
 
-# print(train_corpus[:2])
-# print(test_corpus[:2])
+
+if __name__ == "__main__":
+    tagged_docs = read_corpus(DOCS_TOKENS_FILE)
+    model = train(tagged_docs)
+    write_doc_vectors(model, "doc-vectors.json")

@@ -46,8 +46,14 @@ const STOP_WORDS = new Set([
 ]);
 
 export const readJSON = (oldJsonPath: string) => {
-    const fileBuffer = readFileSync(oldJsonPath);
-    return JSON.parse(fileBuffer.toString());
+    return JSON.parse(
+        '[' +
+            readFileSync(oldJsonPath)
+                .toString()
+                .split('\n')
+                .join(',') +
+            ']'
+    );
 };
 // writeJSON(dataDocs, '../new-data.json');
 // dataDocs = [{...}, {...}]
@@ -253,14 +259,13 @@ const flip = obj => Object.fromEntries(Object.entries(obj).map(([k, v]) => [v, k
 // );
 // writeFileSync('image_paths.txt', image_paths.join('\n'));
 
-// const docsVectors = JSON.parse(
-//     readFileSync('../data_proccessing/doc2vec/docVectors.json').toString()
-// );
-// console.log(docsVectors.map(vec => vec.length));
-///const dataDocs: DataDoc[] = readJSON('../data.json');
-// addDocVectors(dataDocs, docsVectors);
-// const idToTerm = addTfIdfVector(dataDocs);
-// writeJSON(dataDocs, 'new-data.json');
+export const addDocVectorsToData = (docVectorsFilename: string, dataDocsFilename: string, outputFilename: string) => {
+    const docsVectors = JSON.parse(readFileSync(docVectorsFilename).toString());
+    const dataDocs: DataDoc[] = readJSON(dataDocsFilename);
+    addDocVectors(dataDocs, docsVectors);
+    // const idToTerm = addTfIdfVector(dataDocs);
+    writeJSON(dataDocs, outputFilename);
+};
 
 // console.log('dataDocs[0]', dataDocs[0]);
 // console.log('idToTerm["0"]', idToTerm["0"]);
@@ -277,18 +282,16 @@ const flip = obj => Object.fromEntries(Object.entries(obj).map(([k, v]) => [v, k
 // console.log('idToTerm[4]', idToTerm[4]);
 // console.log('idfMap[leisur]', idfMap['leisure']);
 
-// const dataDocs: DataDoc[] = readJSON('../data.json');
-// const docsTokens: string[][] = dataDocs.map(dataDoc => {
-//     return dataDoc._source.labelAnnotations.map(annotation => {
-//         return annotation.description;
-//     });
-// });
-// const doc2vecInputFile: string = docsTokens
-//     .map(docTokens => docTokens.flatMap(toTerms).join(' '))
-//     .join('\n');
-
-// writeFileSync('doc2vecInputFile.txt', doc2vecInputFile);
-
+export const createDocTokensFile = (docsFile: string, outputDocTokensFile: string) => {
+    const dataDocs: DataDoc[] = readJSON(docsFile);
+    const docsTokens: string[][] = dataDocs.map(dataDoc => {
+        return dataDoc._source.labelAnnotations.map(annotation => {
+            return annotation.description;
+        });
+    });
+    const doc2vecInputFile: string = docsTokens.map(docTokens => docTokens.flatMap(toTerms).join(' ')).join('\n');
+    writeFileSync(outputDocTokensFile, doc2vecInputFile);
+};
 // console.log(docsVectors);
 
 // classifyImage(imagePath).then(predictions => {
