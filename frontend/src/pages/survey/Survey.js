@@ -6,6 +6,7 @@ import { toImageURL, toPercentage } from '../../utils/app-utils';
 import Button from 'react-bootstrap/Button';
 import Card from 'react-bootstrap/Card';
 import Container from 'react-bootstrap/Container';
+import HoverRating from '../../components/hover-rating/HoverRating';
 import { SERVER_URL } from '../../utils/consts';
 import Spinner from 'react-bootstrap/Spinner';
 import VerticalSlider from '../../components/vertical-slider/VerticalSlider';
@@ -24,6 +25,7 @@ const Survey = () => {
     const [queryTime, setQueryTime] = useState({ tfIdf: null, doc2vec: null });
     const [clearScreen, setClearScreen] = useState(false);
     const [resultIndex, setResultIndex] = useState(null);
+    const [objectsRating, setObjectsRating] = useState(2.5);
 
     const onClickGetSimilar = () => {
         setClearScreen(false);
@@ -62,14 +64,6 @@ const Survey = () => {
 
                 if (sortedResults.length > 0) {
                     setError(false);
-                    // setResults({
-                    //     tfIdf: tfIdfResults,
-                    //     doc2vec: doc2vecResults
-                    // });
-                    // setRatings({
-                    //     tfIdf: tfIdfResults.map(res => ({ similarityScore: toPercentage(res._score), rating: 5 })),
-                    //     doc2vec: doc2vecResults.map(res => ({ similarityScore: toPercentage(res._score), rating: 5 }))
-                    // });
                     setImageDescriptions(
                         searchedImage.body.hits.hits[0]._source.labelAnnotations
                             .map(annotation => {
@@ -87,7 +81,6 @@ const Survey = () => {
     };
 
     const addVoteToFirebase = () => {
-        // console.log('ratings', ratings);
         db.collection('scores')
             .add({
                 searchedImage: searchImage,
@@ -155,18 +148,20 @@ const Survey = () => {
             return annotation.description;
         });
         const descriptionString = descriptions.join(', ');
-        const url = toImageURL(image_path);
         return (
-            <div style={{ marginRight: 50 }}>
-                <Card key={image_path} style={{ width: '18rem' }}>
+            <img
+                style={{ objectFit: 'cover', float: 'right', height: '70vh', width: '40vw' }}
+                src={toImageURL(image_path)}
+            >
+                {/* <Card key={image_path} style={{ height: '100%', width: '40%', margin: 'auto' }}>
                     <Card.Img variant="top" src={url} />
                     <Card.Body>
                         <Card.Title>Score: {similarityScore}%</Card.Title>
                         <Card.Title>Lables</Card.Title>
                         <Card.Text>{descriptionString}</Card.Text>
                     </Card.Body>
-                </Card>
-            </div>
+                </Card> */}
+            </img>
         );
     };
 
@@ -230,37 +225,51 @@ const Survey = () => {
             {!error && !loading && results && results.length > 0 ? (
                 <div>
                     <h1 style={{ textAlign: 'center' }}>{resultIndex + 1} / 10</h1>
-                    <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
+                    <div
+                        style={{
+                            display: 'flex',
+                            flexDirection: 'row',
+                            justifyContent: 'space-between'
+                        }}
+                    >
                         {imageDescriptions && !clearScreen ? (
-                            <div>
-                                <Card style={{ width: '18rem' }}>
+                            <img
+                                style={{
+                                    height: '70vh',
+                                    width: '40vw',
+                                    objectFit: 'cover',
+                                    float: 'left'
+                                }}
+                                src={toImageURL(searchImage.image_path)}
+                            >
+                                {/* <Card style={{ width: '18rem', margin: 'auto' }}>
                                     <Card.Img variant="top" src={toImageURL(searchImage.image_path)} />
                                     <Card.Body>
                                         <Card.Title>Search Image</Card.Title>
                                         <Card.Text>{imageDescriptions}</Card.Text>
                                     </Card.Body>
-                                </Card>
-                            </div>
+                                </Card> */}
+                            </img>
                         ) : null}
 
-                        <div style={{ paddingLeft: 150, paddingRight: 150 }}>
-                            <VerticalSlider
+                        <div style={{ width: '20vw', paddingLeft: '20px' }}>
+                            <HoverRating
+                                rating={objectsRating}
+                                setRating={newRating => {
+                                    setObjectsRating(newRating);
+                                    const newResults = [...results];
+                                    newResults[resultIndex].userRating.rating = Math.floor(newRating * 2);
+                                    setResults(newResults);
+                                }}
+                            />
+                            {/* <VerticalSlider
                                 key={`result-${resultIndex}`}
-                                onSetSlider={
-                                    numChosen => {
-                                        const newResults = [...results];
-                                        newResults[resultIndex].userRating.rating = numChosen;
-                                        setResults(newResults);
-                                    }
-                                    // setRatings({
-                                    //     ...ratings,
-                                    //     tfIdf: updateArray(ratings.tfIdf, index, {
-                                    //         rating: numChosen,
-                                    //         similarityScore: toPercentage(tfIdfResult._score)
-                                    //     })
-                                    // })
-                                }
-                            ></VerticalSlider>
+                                onSetSlider={numChosen => {
+                                    const newResults = [...results];
+                                    newResults[resultIndex].userRating.rating = numChosen;
+                                    setResults(newResults);
+                                }}
+                            ></VerticalSlider> */}
                         </div>
                         {displayImage()}
                     </div>
@@ -273,6 +282,7 @@ const Survey = () => {
                         }}
                     >
                         <Button
+                            style={{ marginTop: 20 }}
                             varient="primary"
                             onClick={() => {
                                 if (resultIndex === results.length - 1) {
