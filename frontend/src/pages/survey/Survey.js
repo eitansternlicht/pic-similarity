@@ -244,14 +244,12 @@ const Survey = () => {
             {loading ? <Spinner animation="border" /> : null}
             {!error && !loading && uniqueResults && uniqueResults.length > 0 ? (
                 <div>
-                    <h1 style={{ textAlign: 'center' }}>
-                        {resultIndex + 1} / {uniqueResults.length}
-                    </h1>
                     <div
                         style={{
                             display: 'flex',
                             flexDirection: 'row',
-                            justifyContent: 'space-between'
+                            justifyContent: 'space-between',
+                            marginTop: 30
                         }}
                     >
                         <img
@@ -259,13 +257,25 @@ const Survey = () => {
                                 height: '70vh',
                                 width: '40vw',
                                 objectFit: 'cover',
-                                float: 'left'
+                                float: 'left',
+                                border: '5px solid red'
                             }}
                             src={toImageURL(searchImage.image_path)}
                         />
-                        <div>
+                        <div
+                            style={{
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                paddingLeft: '20px',
+                                width: '20vw'
+                            }}
+                        >
+                            <h1 style={{ textAlign: 'center', marginBottom: 50, marginTop: 10 }}>
+                                {resultIndex + 1} / {uniqueResults.length}
+                            </h1>
                             <h6>Objects</h6>
-                            <div style={{ width: '20vw', paddingLeft: '20px' }}>
+                            <div>
                                 <HoverRating
                                     ratingName={'objectsRating'}
                                     rating={objectsRating}
@@ -279,7 +289,7 @@ const Survey = () => {
                             </div>
                             <h6>Background & Color</h6>
 
-                            <div style={{ width: '20vw', paddingLeft: '20px' }}>
+                            <div>
                                 <HoverRating
                                     ratingName={'backgroundRating'}
                                     rating={backgroundRating}
@@ -295,7 +305,7 @@ const Survey = () => {
                             </div>
                             <h6>Situation / Scenrio</h6>
 
-                            <div style={{ width: '20vw', paddingLeft: '20px' }}>
+                            <div>
                                 <HoverRating
                                     ratingName={'scenarioRating'}
                                     rating={scenarioRating}
@@ -307,36 +317,35 @@ const Survey = () => {
                                     }}
                                 />
                             </div>
+                            <div
+                                style={{
+                                    textAlign: 'center'
+                                }}
+                            >
+                                <Button
+                                    style={{ marginTop: 50 }}
+                                    varient="primary"
+                                    onClick={() => {
+                                        if (resultIndex === uniqueResults.length - 1) {
+                                            setLoading(true);
+                                            addVoteToFirebase().then(_ =>
+                                                onClickGetSimilar().then(_ => setLoading(false))
+                                            );
+                                        } else {
+                                            setResultIndex(resultIndex + 1);
+                                        }
+                                        setObjectsRating(2.5);
+                                        setBackgroundRating(2.5);
+                                        setScenarioRating(2.5);
+                                        console.log('uniqueResults', uniqueResults);
+                                    }}
+                                    type="submit"
+                                >
+                                    Submit Ratings
+                                </Button>
+                            </div>
                         </div>
                         {displayImage()}
-                    </div>
-                    <div
-                        style={{
-                            display: 'flex',
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            paddingBottom: 50
-                        }}
-                    >
-                        <Button
-                            style={{ marginTop: 20 }}
-                            varient="primary"
-                            onClick={() => {
-                                if (resultIndex === uniqueResults.length - 1) {
-                                    setLoading(true);
-                                    addVoteToFirebase().then(_ => onClickGetSimilar().then(_ => setLoading(false)));
-                                } else {
-                                    setResultIndex(resultIndex + 1);
-                                }
-                                setObjectsRating(2.5);
-                                setBackgroundRating(2.5);
-                                setScenarioRating(2.5);
-                                console.log('uniqueResults', uniqueResults);
-                            }}
-                            type="submit"
-                        >
-                            Submit
-                        </Button>
                     </div>
                 </div>
             ) : null}
