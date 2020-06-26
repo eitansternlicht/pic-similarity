@@ -27,17 +27,23 @@ const SurveyResults = () => {
             });
     }, []);
     return scores ? (
-        <>
+        <div style={{ padding: 20 }}>
             <div>Number of surveys: {scores.length}</div>
             <div>
                 {'TF-IDF average user rating: ' +
-                    average(scores.flatMap(score => score.tfIdf.results.map(res => res.userRating.rating))).toFixed(1)}
+                    average(
+                        scores.flatMap(score =>
+                            score.tfIdf.results.map(res => average(Object.values(res.userRating.ratings)))
+                        )
+                    ).toFixed(1)}
             </div>
             <div>
                 {'Doc2Vec average user rating: ' +
-                    average(scores.flatMap(score => score.doc2vec.results.map(res => res.userRating.rating))).toFixed(
-                        1
-                    )}
+                    average(
+                        scores.flatMap(score =>
+                            score.doc2vec.results.map(res => average(Object.values(res.userRating.ratings)))
+                        )
+                    ).toFixed(1)}
             </div>
             <ChartQueryTime docs={scores} />
             <ScatterChartGoogleVision docs={scores} />
@@ -60,7 +66,7 @@ const SurveyResults = () => {
                     algorithmTitle="Doc2Vec"
                 />
             </div>
-        </>
+        </div>
     ) : null;
 };
 export default SurveyResults;

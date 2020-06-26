@@ -21,10 +21,11 @@ export const similarityToUserRatings = (similarityAlgorithm, docs) => {
             if (rounded === 100) {
                 console.log('100', res.userRating.similarityScore);
             }
+            const rating = Math.floor(average(Object.values(res.userRating.ratings)));
             if (rounded in results) {
-                results[rounded].push(res.userRating.rating);
+                results[rounded].push(rating);
             } else {
-                results[rounded] = [res.userRating.rating];
+                results[rounded] = [rating];
             }
         }
     }
@@ -36,6 +37,6 @@ export const docToGoogleVisionConfidence = similarityAlgorithm => doc => {
     const searchedImageConf = average(doc.searchedImage.labelAnnotations.map(a => a.score));
     return doc[similarityAlgorithm].results.map(res => ({
         x: (average(res.labelAnnotations.map(a => a.score)) * searchedImageConf * 100).toFixed(1),
-        y: res.userRating.rating
+        y: average(Object.values(res.userRating.ratings)).toFixed(1)
     }));
 };

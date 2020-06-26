@@ -4,12 +4,10 @@ import React, { useState } from 'react';
 import { toImageURL, toPercentage } from '../../utils/app-utils';
 
 import Button from 'react-bootstrap/Button';
-import Card from 'react-bootstrap/Card';
 import Container from 'react-bootstrap/Container';
 import HoverRating from '../../components/hover-rating/HoverRating';
 import { SERVER_URL } from '../../utils/consts';
 import Spinner from 'react-bootstrap/Spinner';
-import VerticalSlider from '../../components/vertical-slider/VerticalSlider';
 import axios from 'axios';
 import firebase from '../../config/firebase';
 
@@ -19,22 +17,20 @@ const Survey = () => {
     const [showInstructions, setShowInstructions] = useState(true);
     const [imageDescriptions, setImageDescriptions] = useState('');
     const [results, setResults] = useState([]);
+    const [uniqueResults, setUniqueResults] = useState([]);
     const [searchImage, setSearchImage] = useState(undefined);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(false);
     const [queryTime, setQueryTime] = useState({ tfIdf: null, doc2vec: null });
-    const [clearScreen, setClearScreen] = useState(false);
     const [resultIndex, setResultIndex] = useState(null);
     const [objectsRating, setObjectsRating] = useState(2.5);
     const [backgroundRating, setBackgroundRating] = useState(2.5);
-    const [scoreRating, setScoreRating] = useState(2.5);
-    const [senrioRating, setSenrioRating] = useState(2.5);
+    const [scenarioRating, setScenarioRating] = useState(2.5);
 
     const onClickGetSimilar = () => {
-        setClearScreen(false);
         setError(false);
         setLoading(true);
-        axios
+        return axios
             .get(`${SERVER_URL}/random`)
             .then(res => {
                 console.log('res', res);
@@ -45,7 +41,7 @@ const Survey = () => {
                     .map(result => ({
                         algorithm: 'tfIdf',
                         userRating: {
-                            ratings: { objectsRating: 5, backgroundRating: 5, scoreRating: 5, senrioRating: 5 },
+                            ratings: { objects: 5, background: 5, scoreRating: 5, scenario: 5 },
                             similarityScore: toPercentage(result._score)
                         },
                         result
@@ -54,14 +50,25 @@ const Survey = () => {
                         doc2vecResults.map(result => ({
                             algorithm: 'doc2vec',
                             userRating: {
-                                ratings: { objectsRating: 5, backgroundRating: 5, scoreRating: 5, senrioRating: 5 },
+                                ratings: { objects: 5, background: 5, scoreRating: 5, scenario: 5 },
                                 similarityScore: toPercentage(result._score)
                             },
                             result
                         }))
                     )
                     .sort((res1, res2) => (res1.result._score < res2.result._score ? 1 : -1));
+                const uniqueImages = new Set([]);
+                const uniqueResults = [];
+                sortedResults.forEach(res => {
+                    const { image_path } = res.result._source;
+                    if (!uniqueImages.has(image_path)) {
+                        uniqueResults.push(res);
+                        uniqueImages.add(image_path);
+                    }
+                });
+
                 setResults(sortedResults);
+                setUniqueResults(uniqueResults);
                 setResultIndex(0);
 
                 console.log('results', sortedResults);
@@ -90,12 +97,20 @@ const Survey = () => {
     };
 
     const addVoteToFirebase = () => {
-        db.collection('scores')
+        const uniqueRatings = Object.fromEntries(
+            uniqueResults.map(res => [res.result._source.image_path, res.userRating])
+        );
+        const nonUniqueResults = results.map(res => ({
+            ...res,
+            userRating: uniqueRatings[res.result._source.image_path]
+        }));
+        return db
+            .collection('scores')
             .add({
                 searchedImage: searchImage,
                 tfIdf: {
                     queryTime: queryTime.tfIdf,
-                    results: results
+                    results: nonUniqueResults
                         .filter(res => res.algorithm === 'tfIdf')
                         .map(
                             ({
@@ -114,7 +129,7 @@ const Survey = () => {
                 },
                 doc2vec: {
                     queryTime: queryTime.doc2vec,
-                    results: results
+                    results: nonUniqueResults
                         .filter(res => res.algorithm === 'doc2vec')
                         .map(
                             ({
@@ -132,18 +147,24 @@ const Survey = () => {
                         )
                 }
             })
-            .then(res => {
+            .then(_ => {
                 setResultIndex(0);
-                setClearScreen(true);
-                setImageDescriptions(null);
                 setResults(null);
+                setUniqueResults(null);
                 setSearchImage(null);
                 setError(false);
-                setError(false);
                 setQueryTime({ tfIdf: null, doc2vec: null });
+                setLoading(false);
             })
             .catch(err => {
+                setResultIndex(0);
+                setResults(null);
+                setUniqueResults(null);
+                setSearchImage(null);
+                setError(false);
+                setQueryTime({ tfIdf: null, doc2vec: null });
                 setError(err);
+                setLoading(false);
             });
     };
 
@@ -151,7 +172,7 @@ const Survey = () => {
         const {
             userRating: { similarityScore },
             result
-        } = results[resultIndex];
+        } = uniqueResults[resultIndex];
         const { image_path, labelAnnotations } = result._source;
         const descriptions = labelAnnotations.map(annotation => {
             return annotation.description;
@@ -161,16 +182,7 @@ const Survey = () => {
             <img
                 style={{ objectFit: 'cover', float: 'right', height: '70vh', width: '40vw' }}
                 src={toImageURL(image_path)}
-            >
-                {/* <Card key={image_path} style={{ height: '100%', width: '40%', margin: 'auto' }}>
-                    <Card.Img variant="top" src={url} />
-                    <Card.Body>
-                        <Card.Title>Score: {similarityScore}%</Card.Title>
-                        <Card.Title>Lables</Card.Title>
-                        <Card.Text>{descriptionString}</Card.Text>
-                    </Card.Body>
-                </Card> */}
-            </img>
+            />
         );
     };
 
@@ -205,7 +217,8 @@ const Survey = () => {
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                         <h4>
-                            How much is the situation/senrio in the pictures similiar to the one in the searched image?
+                            How much is the situation/scenario in the pictures similiar to the one in the searched
+                            image?
                         </h4>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
@@ -231,9 +244,11 @@ const Survey = () => {
                 </div>
             ) : null}
             {loading ? <Spinner animation="border" /> : null}
-            {!error && !loading && results && results.length > 0 ? (
+            {!error && !loading && uniqueResults && uniqueResults.length > 0 ? (
                 <div>
-                    <h1 style={{ textAlign: 'center' }}>{resultIndex + 1} / 10</h1>
+                    <h1 style={{ textAlign: 'center' }}>
+                        {resultIndex + 1} / {uniqueResults.length}
+                    </h1>
                     <div
                         style={{
                             display: 'flex',
@@ -241,88 +256,56 @@ const Survey = () => {
                             justifyContent: 'space-between'
                         }}
                     >
-                        {imageDescriptions && !clearScreen ? (
-                            <img
-                                style={{
-                                    height: '70vh',
-                                    width: '40vw',
-                                    objectFit: 'cover',
-                                    float: 'left'
-                                }}
-                                src={toImageURL(searchImage.image_path)}
-                            >
-                                {/* <Card style={{ width: '18rem', margin: 'auto' }}>
-                                    <Card.Img variant="top" src={toImageURL(searchImage.image_path)} />
-                                    <Card.Body>
-                                        <Card.Title>Search Image</Card.Title>
-                                        <Card.Text>{imageDescriptions}</Card.Text>
-                                    </Card.Body>
-                                </Card> */}
-                            </img>
-                        ) : null}
+                        <img
+                            style={{
+                                height: '70vh',
+                                width: '40vw',
+                                objectFit: 'cover',
+                                float: 'left'
+                            }}
+                            src={toImageURL(searchImage.image_path)}
+                        />
                         <div>
-                            <h6>objects Rating</h6>
+                            <h6>Objects</h6>
                             <div style={{ width: '20vw', paddingLeft: '20px' }}>
                                 <HoverRating
                                     ratingName={'objectsRating'}
                                     rating={objectsRating}
                                     setRating={newRating => {
-                                        const newResults = [...results];
-                                        newResults[resultIndex].userRating.ratings.objectsRating = Math.floor(
-                                            newRating * 2
-                                        );
-                                        setResults(newResults);
+                                        const newResults = [...uniqueResults];
+                                        newResults[resultIndex].userRating.ratings.objects = Math.floor(newRating * 2);
+                                        setUniqueResults(newResults);
                                         setObjectsRating(newRating);
                                     }}
                                 />
                             </div>
-                            <h6>background {'&'} color Rating</h6>
+                            <h6>Background & Color</h6>
 
                             <div style={{ width: '20vw', paddingLeft: '20px' }}>
                                 <HoverRating
                                     ratingName={'backgroundRating'}
                                     rating={backgroundRating}
                                     setRating={newRating => {
-                                        const newResults = [...results];
-                                        newResults[resultIndex].userRating.ratings.backgroundRating = Math.floor(
+                                        const newResults = [...uniqueResults];
+                                        newResults[resultIndex].userRating.ratings.background = Math.floor(
                                             newRating * 2
                                         );
-                                        setResults(newResults);
+                                        setUniqueResults(newResults);
                                         setBackgroundRating(newRating);
-                                        console.log('new rating', newRating);
-                                        console.log('objectsRating', objectsRating);
                                     }}
                                 />
                             </div>
-                            <h6>score Rating</h6>
+                            <h6>Situation / Scenrio</h6>
 
                             <div style={{ width: '20vw', paddingLeft: '20px' }}>
                                 <HoverRating
-                                    ratingName={'scoreRating'}
-                                    rating={scoreRating}
+                                    ratingName={'scenarioRating'}
+                                    rating={scenarioRating}
                                     setRating={newRating => {
-                                        const newResults = [...results];
-                                        newResults[resultIndex].userRating.ratings.scoreRating = Math.floor(
-                                            newRating * 2
-                                        );
-                                        setResults(newResults);
-                                        setScoreRating(newRating);
-                                    }}
-                                />
-                            </div>
-                            <h6>situation/senrio Rating</h6>
-
-                            <div style={{ width: '20vw', paddingLeft: '20px' }}>
-                                <HoverRating
-                                    ratingName={'senrioRating'}
-                                    rating={senrioRating}
-                                    setRating={newRating => {
-                                        setSenrioRating(newRating);
-                                        const newResults = [...results];
-                                        newResults[resultIndex].userRating.ratings.senrioRating = Math.floor(
-                                            newRating * 2
-                                        );
-                                        setResults(newResults);
+                                        const newResults = [...uniqueResults];
+                                        newResults[resultIndex].userRating.ratings.scenario = Math.floor(newRating * 2);
+                                        setUniqueResults(newResults);
+                                        setScenarioRating(newRating);
                                     }}
                                 />
                             </div>
@@ -341,14 +324,16 @@ const Survey = () => {
                             style={{ marginTop: 20 }}
                             varient="primary"
                             onClick={() => {
-                                if (resultIndex === results.length - 1) {
-                                    addVoteToFirebase();
-                                    onClickGetSimilar();
+                                if (resultIndex === uniqueResults.length - 1) {
+                                    setLoading(true);
+                                    addVoteToFirebase().then(_ => onClickGetSimilar().then(_ => setLoading(false)));
                                 } else {
                                     setResultIndex(resultIndex + 1);
                                 }
-                                console.log('resultssss', results);
-                                console.log('results index', resultIndex);
+                                setObjectsRating(2.5);
+                                setBackgroundRating(2.5);
+                                setScenarioRating(2.5);
+                                console.log('uniqueResults', uniqueResults);
                             }}
                             type="submit"
                         >
