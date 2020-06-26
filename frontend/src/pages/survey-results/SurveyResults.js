@@ -3,7 +3,6 @@ import 'tui-chart/dist/tui-chart.css';
 import React, { useEffect, useState } from 'react';
 
 import ChartAverageRating from '../../components/chart-average-rating/ChartAverageRating';
-import ChartQueryTime from '../../components/chart-query-time/ChartQueryTime';
 import PieCategoryRatings from '../../components/pie-category-ratings/PieCategoryRatings';
 import RangeSlider from '../../components/range-slider/RangeSlider';
 import ScatterChartGoogleVision from '../../components/scatter-chart-google-vision/ScatterChartGoogleVision';
@@ -45,7 +44,6 @@ const SurveyResults = () => {
                         )
                     ).toFixed(1)}
             </div>
-            <ChartQueryTime docs={scores} />
             <ScatterChartGoogleVision docs={scores} />
             <ChartAverageRating docs={scores} />
             <div>
