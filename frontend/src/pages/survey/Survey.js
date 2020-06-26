@@ -1,11 +1,12 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-import React, { useState } from 'react';
+import React, { createRef, useState } from 'react';
 import { toImageURL, toPercentage } from '../../utils/app-utils';
 
 import Button from 'react-bootstrap/Button';
 import Container from 'react-bootstrap/Container';
 import HoverRating from '../../components/hover-rating/HoverRating';
+import NotificationSystem from 'react-notification-system';
 import { SERVER_URL } from '../../utils/consts';
 import Spinner from 'react-bootstrap/Spinner';
 import axios from 'axios';
@@ -24,7 +25,11 @@ const Survey = () => {
     const [objectsRating, setObjectsRating] = useState(2.5);
     const [backgroundRating, setBackgroundRating] = useState(2.5);
     const [scenarioRating, setScenarioRating] = useState(2.5);
+    const notificationSystem = createRef();
 
+    // const addNotification = () => {
+
+    // };
     const onClickGetSimilar = () => {
         setError(false);
         setLoading(true);
@@ -186,6 +191,7 @@ const Survey = () => {
 
     return (
         <Container fluid>
+            <NotificationSystem ref={notificationSystem} />
             {showInstructions ? (
                 <div>
                     <div
@@ -233,7 +239,6 @@ const Survey = () => {
                                 setShowInstructions(false);
                                 onClickGetSimilar();
                             }}
-                            type="submit"
                             style={{ marginTop: 30, marginBottom: 30 }}
                         >
                             Start
@@ -327,10 +332,15 @@ const Survey = () => {
                                     varient="primary"
                                     onClick={() => {
                                         if (resultIndex === uniqueResults.length - 1) {
+                                            notificationSystem.current.addNotification({
+                                                title: 'Successfully submitted survey!',
+                                                message: 'Please try doing another one!',
+                                                level: 'success'
+                                            });
                                             setLoading(true);
-                                            addVoteToFirebase().then(_ =>
-                                                onClickGetSimilar().then(_ => setLoading(false))
-                                            );
+                                            addVoteToFirebase().then(_ => {
+                                                onClickGetSimilar().then(_ => setLoading(false));
+                                            });
                                         } else {
                                             setResultIndex(resultIndex + 1);
                                         }
