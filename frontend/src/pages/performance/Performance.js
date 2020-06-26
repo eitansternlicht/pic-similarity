@@ -3,9 +3,7 @@ import 'tui-chart/dist/tui-chart.css';
 import React, { useEffect, useState } from 'react';
 
 import ChartQueryTime from '../../components/chart-query-time/ChartQueryTime';
-import firebase from '../../config/firebase';
-
-const db = firebase.firestore();
+import { firestore as db } from '../../config/firebase';
 
 const Performance = () => {
     const [scores, setScores] = useState(null);

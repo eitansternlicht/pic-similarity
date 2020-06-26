@@ -7,9 +7,7 @@ import PieCategoryRatings from '../../components/pie-category-ratings/PieCategor
 import RangeSlider from '../../components/range-slider/RangeSlider';
 import ScatterChartGoogleVision from '../../components/scatter-chart-google-vision/ScatterChartGoogleVision';
 import { average } from '../../utils/func-utils';
-import firebase from '../../config/firebase';
-
-const db = firebase.firestore();
+import { firestore as db } from '../../config/firebase';
 
 const SurveyResults = () => {
     const [scores, setScores] = useState(null);

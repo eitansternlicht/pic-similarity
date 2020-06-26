@@ -1,4 +1,5 @@
-import 'bootstrap/dist/css/bootstrap.min.css';
+// import 'bootstrap/dist/css/bootstrap.min.css';
+import './App.css';
 
 import React, { useState } from 'react';
 
@@ -8,6 +9,7 @@ import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import { SERVER_PORT } from '../../utils/consts';
 import Spinner from 'react-bootstrap/Spinner';
+import { auth } from '../../config/firebase';
 import axios from 'axios';
 import { toImageURL } from '../../utils/app-utils';
 
@@ -21,6 +23,10 @@ const App = () => {
     const [error, setError] = useState(false);
     const [clearScreen, setClearScreen] = useState(false);
     const [imageInputRef, setImageInputRef] = useState('');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [loginError, setLoginError] = useState(null);
+    const [loggedIn, setLoggedIn] = useState(false);
 
     const onChangeFilePicker = event => {
         setSearchImage(event.target.files[0]);
@@ -67,8 +73,41 @@ const App = () => {
                 setLoading(false);
             });
     };
-
-    return (
+    const login = (
+        <div class="container" onclick="onclick">
+            <div class="top"></div>
+            <div class="bottom"></div>
+            <div class="center">
+                <h2>Please Sign In</h2>
+                <input type="email" placeholder="email" value={email} onInput={event => setEmail(event.target.value)} />
+                <input
+                    type="password"
+                    placeholder="password"
+                    value={password}
+                    onInput={event => setPassword(event.target.value)}
+                />
+                <button
+                    onClick={() => {
+                        auth.signInWithEmailAndPassword(email, password).then(
+                            _ => {
+                                setLoggedIn(true);
+                                setLoginError(null);
+                                setEmail('');
+                                setPassword('');
+                            },
+                            error => {
+                                setLoginError(error.toString());
+                            }
+                        );
+                    }}
+                >
+                    Sign in
+                </button>
+                {loginError ? <div style={{ color: 'red', marginTop: 10 }}>{loginError}</div> : null}
+            </div>
+        </div>
+    );
+    const mainApp = (
         <Container fluid>
             <h1>Pic Similarity Service</h1>
             <h2>Upload Image</h2>
@@ -149,5 +188,6 @@ const App = () => {
             ) : null}
         </Container>
     );
+    return loggedIn ? mainApp : login;
 };
 export default App;

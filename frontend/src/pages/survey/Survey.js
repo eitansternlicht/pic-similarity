@@ -9,9 +9,7 @@ import HoverRating from '../../components/hover-rating/HoverRating';
 import { SERVER_URL } from '../../utils/consts';
 import Spinner from 'react-bootstrap/Spinner';
 import axios from 'axios';
-import firebase from '../../config/firebase';
-
-const db = firebase.firestore();
+import { firestore as db } from '../../config/firebase';
 
 const Survey = () => {
     const [showInstructions, setShowInstructions] = useState(true);
