@@ -18,7 +18,12 @@ App.post('/upload', multer({ dest: __dirname + '/uploads' }).single('file'), ({ 
     queryElastic(originalname).then(results => response.json(results))
 );
 
-App.get('/random', (_, response) => queryElastic(generateRandomImagePath()).then(results => response.json(results)));
+App.get('/random', (_, response) =>
+    queryElastic(generateRandomImagePath()).then(
+        results => response.json(results),
+        error => console.log(error)
+    )
+);
 
 App.listen(PORT, () => {
     console.log(`Pic Similarity Serive listening on PORT ${PORT}!`);

@@ -1,4 +1,5 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
+import 'react-loader-spinner/dist/loader/css/react-spinner-loader.css';
 
 import React, { createRef, useState } from 'react';
 import { toImageURL, toPercentage } from '../../utils/app-utils';
@@ -6,6 +7,7 @@ import { toImageURL, toPercentage } from '../../utils/app-utils';
 import Button from 'react-bootstrap/Button';
 import Container from 'react-bootstrap/Container';
 import HoverRating from '../../components/hover-rating/HoverRating';
+import Loader from 'react-loader-spinner';
 import NotificationSystem from 'react-notification-system';
 import { SERVER_URL } from '../../utils/consts';
 import Spinner from 'react-bootstrap/Spinner';
@@ -25,6 +27,8 @@ const Survey = () => {
     const [objectsRating, setObjectsRating] = useState(2.5);
     const [backgroundRating, setBackgroundRating] = useState(2.5);
     const [scenarioRating, setScenarioRating] = useState(2.5);
+    const [genSpinnerDone, setGenSpinnerDone] = useState(false);
+    const [searchSpinnerDone, setSearchSpinnerDone] = useState(false);
     const notificationSystem = createRef();
 
     // const addNotification = () => {
@@ -33,6 +37,16 @@ const Survey = () => {
     const getSimilar = () => {
         setError(false);
         setLoading(true);
+        setGenSpinnerDone(false);
+        setSearchSpinnerDone(false);
+        setResultIndex(0);
+        setResults([]);
+        setUniqueResults([]);
+        setSearchImage(null);
+        setQueryTime({
+            tfIdf: null,
+            doc2vec: null
+        });
         return axios
             .get(`${SERVER_URL}/random`)
             .then(res => {
@@ -79,6 +93,7 @@ const Survey = () => {
                     tfIdf: tfIdf.body.took,
                     doc2vec: doc2vec.body.took
                 });
+                console.log('searchedImage', searchedImage);
                 setSearchImage(searchedImage.body.hits.hits[0]._source);
 
                 if (sortedResults.length > 0) {
@@ -92,6 +107,11 @@ const Survey = () => {
                     );
                 }
                 setLoading(false);
+                // if (genSpinnerDone) {
+                //     console.log('took awhile');
+                //     setSearchSpinnerDone(false);
+                //     setTimeout(() => setSearchSpinnerDone(true), 2500);
+                // }
             })
             .catch(e => {
                 console.error(e);
@@ -107,68 +127,66 @@ const Survey = () => {
             ...res,
             userRating: uniqueRatings[res.result._source.image_path]
         }));
-        return db
-            .collection('scores')
-            .add({
-                searchedImage: searchImage,
-                tfIdf: {
-                    queryTime: queryTime.tfIdf,
-                    results: nonUniqueResults
-                        .filter(res => res.algorithm === 'tfIdf')
-                        .map(
-                            ({
-                                userRating,
-                                result: {
-                                    _source: { labelAnnotations, image_path }
-                                }
-                            }) => {
-                                return {
-                                    imagePath: image_path,
-                                    labelAnnotations,
-                                    userRating
-                                };
+        return db.collection('scores').add({
+            searchedImage: searchImage,
+            tfIdf: {
+                queryTime: queryTime.tfIdf,
+                results: nonUniqueResults
+                    .filter(res => res.algorithm === 'tfIdf')
+                    .map(
+                        ({
+                            userRating,
+                            result: {
+                                _source: { labelAnnotations, image_path }
                             }
-                        )
-                },
-                doc2vec: {
-                    queryTime: queryTime.doc2vec,
-                    results: nonUniqueResults
-                        .filter(res => res.algorithm === 'doc2vec')
-                        .map(
-                            ({
-                                userRating,
-                                result: {
-                                    _source: { labelAnnotations, image_path }
-                                }
-                            }) => {
-                                return {
-                                    imagePath: image_path,
-                                    labelAnnotations,
-                                    userRating
-                                };
+                        }) => {
+                            return {
+                                imagePath: image_path,
+                                labelAnnotations,
+                                userRating
+                            };
+                        }
+                    )
+            },
+            doc2vec: {
+                queryTime: queryTime.doc2vec,
+                results: nonUniqueResults
+                    .filter(res => res.algorithm === 'doc2vec')
+                    .map(
+                        ({
+                            userRating,
+                            result: {
+                                _source: { labelAnnotations, image_path }
                             }
-                        )
-                }
-            })
-            .then(_ => {
-                setResultIndex(0);
-                setResults(null);
-                setUniqueResults(null);
-                setSearchImage(null);
-                setError(false);
-                setQueryTime({ tfIdf: null, doc2vec: null });
-                setLoading(false);
-            })
-            .catch(err => {
-                setResultIndex(0);
-                setResults(null);
-                setUniqueResults(null);
-                setSearchImage(null);
-                setError(false);
-                setQueryTime({ tfIdf: null, doc2vec: null });
-                setError(err);
-                setLoading(false);
-            });
+                        }) => {
+                            return {
+                                imagePath: image_path,
+                                labelAnnotations,
+                                userRating
+                            };
+                        }
+                    )
+            }
+        });
+        // .then(_ => {
+        //     setResultIndex(0);
+        //     setResults([]);
+        //     setUniqueResults([]);
+        //     setSearchImage(null);
+        //     setError(false);
+        //     setQueryTime({ tfIdf: null, doc2vec: null });
+        //     setLoading(false);
+        // })
+        // .catch(err => {
+        //     setResultIndex(0);
+        //     setResults([]);
+        //     setUniqueResults([]);
+        //     setSearchImage(null);
+        //     setError(false);
+        //     setQueryTime({ tfIdf: null, doc2vec: null });
+        //     setError(err);
+        //     setLoading(false);
+        // });
     };
 
     const displayImage = () => {
@@ -181,15 +199,37 @@ const Survey = () => {
             return annotation.description;
         });
         const descriptionString = descriptions.join(', ');
-        return (
-            <img
-                style={{ objectFit: 'cover', float: 'right', height: '70vh', width: '40vw' }}
-                src={toImageURL(image_path)}
-            />
+        return !searchSpinnerDone ? (
+            <div
+                style={{
+                    height: '70vh',
+                    width: '40vw',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexDirection: 'column',
+                    paddingTop: 50
+                }}
+            >
+                <Loader type="Puff" color="#9046CF" height={160} width={160} />
+                <div className="raleway" style={{ color: '#9046CF', marginTop: 20, fontSize: 30 }}>
+                    Searching for similar images...
+                </div>
+            </div>
+        ) : (
+            <div>
+                <h1 className="raleway" style={{ textAlign: 'center', marginBottom: 10 }}>
+                    Similar Images Found ({uniqueResults.length})
+                </h1>
+                <img
+                    style={{ objectFit: 'cover', float: 'right', height: '70vh', width: '40vw' }}
+                    src={toImageURL(image_path)}
+                />
+            </div>
         );
     };
     const instructions = (
-        <div class="instructions">
+        <div className="raleway">
             <h1 style={{ textAlign: 'center', margin: 30 }}>Survey Instructions</h1>
             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', margin: 10 }}>
                 <h4>Please take into consideration the following:</h4>
@@ -218,6 +258,12 @@ const Survey = () => {
                     varient="primary"
                     onClick={() => {
                         setShowInstructions(false);
+                        setTimeout(() => {
+                            setGenSpinnerDone(true);
+                            if (!loading) {
+                                setTimeout(() => setSearchSpinnerDone(true), 2500);
+                            }
+                        }, 2500);
                         getSimilar();
                     }}
                     style={{ marginTop: 30, marginBottom: 30 }}
@@ -232,44 +278,71 @@ const Survey = () => {
     // );
 
     return (
-        <Container fluid>
+        <div style={{ padding: 20 }}>
             <NotificationSystem ref={notificationSystem} />
-            {showInstructions ? instructions : null}
-            {loading ? <Spinner animation="border" /> : null}
-            {!error && !loading && uniqueResults && uniqueResults.length > 0 ? (
-                <div>
-                    <div
-                        style={{
-                            display: 'flex',
-                            flexDirection: 'row',
-                            justifyContent: 'space-between',
-                            marginTop: 30
-                        }}
-                    >
-                        <img
+            {showInstructions ? (
+                instructions
+            ) : (
+                <div
+                    style={{
+                        display: 'flex',
+                        flexDirection: 'row',
+                        justifyContent: 'space-between',
+                        marginTop: 30
+                    }}
+                >
+                    {loading || !genSpinnerDone || !searchImage ? (
+                        <div
                             style={{
                                 height: '70vh',
                                 width: '40vw',
-                                objectFit: 'cover',
-                                float: 'left',
-                                border: '5px solid red'
-                            }}
-                            src={toImageURL(searchImage.image_path)}
-                        />
-                        <div
-                            style={{
-                                justifyContent: 'center',
+                                display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
-                                paddingLeft: '20px',
-                                width: '20vw'
+                                flexDirection: 'column',
+                                paddingTop: 50
                             }}
                         >
-                            <h1 style={{ textAlign: 'center', marginBottom: 50, marginTop: 10 }}>
-                                {resultIndex + 1} / {uniqueResults.length}
+                            <Loader type="Puff" color="#9046CF" height={160} width={160} />
+                            <div className="raleway" style={{ color: '#9046CF', marginTop: 20, fontSize: 30 }}>
+                                Generating Random Image
+                            </div>
+                        </div>
+                    ) : (
+                        <div>
+                            <h1 className="raleway" style={{ textAlign: 'center', marginBottom: 10 }}>
+                                Generated Random Image
                             </h1>
+                            <img
+                                style={{
+                                    height: '70vh',
+                                    width: '40vw',
+                                    objectFit: 'cover',
+                                    float: 'left',
+                                    border: '5px solid red'
+                                }}
+                                src={toImageURL(searchImage.image_path)}
+                            />
+                        </div>
+                    )}
+
+                    {!loading && genSpinnerDone && searchSpinnerDone && uniqueResults.length ? (
+                        <div
+                            style={{
+                                paddingLeft: '20px',
+                                width: '20vw',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                flexDirection: 'column'
+                            }}
+                        >
+                            <h3 className="raleway" style={{ marginBottom: 40 }}>
+                                Rate Similarity
+                            </h3>
+
                             <h6>Objects</h6>
-                            <div>
+                            <div style={{ marginBottom: 20 }}>
                                 <HoverRating
                                     ratingName={'objectsRating'}
                                     rating={objectsRating}
@@ -283,7 +356,7 @@ const Survey = () => {
                             </div>
                             <h6>Background & Color</h6>
 
-                            <div>
+                            <div style={{ marginBottom: 20 }}>
                                 <HoverRating
                                     ratingName={'backgroundRating'}
                                     rating={backgroundRating}
@@ -297,7 +370,7 @@ const Survey = () => {
                                     }}
                                 />
                             </div>
-                            <h6>Situation / Scenrio</h6>
+                            <h6>Situation / Scenario</h6>
 
                             <div>
                                 <HoverRating
@@ -326,10 +399,18 @@ const Survey = () => {
                                                 message: 'Please try doing another one!',
                                                 level: 'success'
                                             });
-                                            setLoading(true);
-                                            addVoteToFirebase().then(_ => {
-                                                getSimilar().then(_ => setLoading(false));
-                                            });
+                                            addVoteToFirebase();
+                                            getSimilar();
+
+                                            setQueryTime({ tfIdf: null, doc2vec: null });
+
+                                            setTimeout(() => {
+                                                setGenSpinnerDone(true);
+                                                if (!loading) {
+                                                    console.log('not loading second time');
+                                                    setTimeout(() => setSearchSpinnerDone(true), 2500);
+                                                }
+                                            }, 2500);
                                         } else {
                                             setResultIndex(resultIndex + 1);
                                         }
@@ -344,11 +425,11 @@ const Survey = () => {
                                 </Button>
                             </div>
                         </div>
-                        {displayImage()}
-                    </div>
+                    ) : null}
+                    {!loading && genSpinnerDone && uniqueResults.length ? displayImage() : null}
                 </div>
-            ) : null}
-        </Container>
+            )}
+        </div>
     );
 };
 
