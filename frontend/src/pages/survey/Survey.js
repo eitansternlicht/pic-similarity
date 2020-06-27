@@ -2,6 +2,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import 'react-loader-spinner/dist/loader/css/react-spinner-loader.css';
 
 import React, { createRef, useState } from 'react';
+import { animated, useSpring } from 'react-spring';
 import { toImageURL, toPercentage } from '../../utils/app-utils';
 
 import Button from 'react-bootstrap/Button';
@@ -30,6 +31,16 @@ const Survey = () => {
     const [genSpinnerDone, setGenSpinnerDone] = useState(false);
     const [searchSpinnerDone, setSearchSpinnerDone] = useState(false);
     const notificationSystem = createRef();
+    const { opacity: genImageOpacity } = useSpring({
+        to: { opacity: searchImage && genSpinnerDone ? 1 : 0 },
+        from: { opacity: 0 },
+        config: { duration: 3000,  }
+    });
+    const { opacity: similarImageOpacity } = useSpring({
+        to: { opacity: uniqueResults.length && searchSpinnerDone ? 1 : 0 },
+        from: { opacity: 0 },
+        config: { duration: 3000 }
+    });
 
     // const addNotification = () => {
 
@@ -218,9 +229,12 @@ const Survey = () => {
             </div>
         ) : (
             <div>
-                <h1 className="raleway" style={{ textAlign: 'center', marginBottom: 10 }}>
+                <animated.h1
+                    className="raleway"
+                    style={{ textAlign: 'center', marginBottom: 10, opacity: similarImageOpacity }}
+                >
                     Similar Images Found ({uniqueResults.length})
-                </h1>
+                </animated.h1>
                 <img
                     style={{ objectFit: 'cover', float: 'right', height: '70vh', width: '40vw' }}
                     src={toImageURL(image_path)}
@@ -310,9 +324,12 @@ const Survey = () => {
                         </div>
                     ) : (
                         <div>
-                            <h1 className="raleway" style={{ textAlign: 'center', marginBottom: 10 }}>
+                            <animated.h1
+                                className="raleway"
+                                style={{ textAlign: 'center', marginBottom: 10, opacity: genImageOpacity }}
+                            >
                                 Generated Random Image
-                            </h1>
+                            </animated.h1>
                             <img
                                 style={{
                                     height: '70vh',
