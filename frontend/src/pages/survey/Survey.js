@@ -30,7 +30,7 @@ const Survey = () => {
     // const addNotification = () => {
 
     // };
-    const onClickGetSimilar = () => {
+    const getSimilar = () => {
         setError(false);
         setLoading(true);
         return axios
@@ -188,64 +188,53 @@ const Survey = () => {
             />
         );
     };
+    const instructions = (
+        <div class="instructions">
+            <h1 style={{ textAlign: 'center', margin: 30 }}>Survey Instructions</h1>
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', margin: 10 }}>
+                <h4>Please take into consideration the following:</h4>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                <ol>
+                    <li>
+                        <h5>
+                            How much are the <b>objects</b> in the pictures similar?
+                        </h5>
+                    </li>
+                    <li>
+                        <h5>
+                            How much are the <b>background & colors</b> similar?
+                        </h5>
+                    </li>
+                    <li>
+                        <h5>
+                            How much is the <b>situation / scenario</b> similar?
+                        </h5>
+                    </li>
+                </ol>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                <Button
+                    varient="primary"
+                    onClick={() => {
+                        setShowInstructions(false);
+                        getSimilar();
+                    }}
+                    style={{ marginTop: 30, marginBottom: 30 }}
+                >
+                    Start
+                </Button>
+            </div>
+        </div>
+    );
+    // const survey = (
+
+    // );
 
     return (
         <Container fluid>
             <NotificationSystem ref={notificationSystem} />
-            {showInstructions ? (
-                <div>
-                    <div
-                        style={{
-                            display: 'flex',
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            paddingTop: 50
-                        }}
-                    >
-                        <h1>Survey</h1>
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: 40 }}>
-                        <h3>Instructions</h3>
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                        <h4>When answering the survey, Please take in consideration the following questions:</h4>
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                        <h4>How much are the objects in the pictures similiar to the searched image?</h4>
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                        <h4>How much are the background of the pictures similiar to the searched image?</h4>
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                        <h4>How much are the colors of the pictures similiar to the searched image?</h4>
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                        <h4>
-                            How much is the situation/scenario in the pictures similiar to the one in the searched
-                            image?
-                        </h4>
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                        <h4>
-                            How much does the percentage displayed under each pictures represent the similarity to the
-                            searched image?
-                        </h4>
-                    </div>
-
-                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                        <Button
-                            varient="primary"
-                            onClick={() => {
-                                setShowInstructions(false);
-                                onClickGetSimilar();
-                            }}
-                            style={{ marginTop: 30, marginBottom: 30 }}
-                        >
-                            Start
-                        </Button>
-                    </div>
-                </div>
-            ) : null}
+            {showInstructions ? instructions : null}
             {loading ? <Spinner animation="border" /> : null}
             {!error && !loading && uniqueResults && uniqueResults.length > 0 ? (
                 <div>
@@ -339,7 +328,7 @@ const Survey = () => {
                                             });
                                             setLoading(true);
                                             addVoteToFirebase().then(_ => {
-                                                onClickGetSimilar().then(_ => setLoading(false));
+                                                getSimilar().then(_ => setLoading(false));
                                             });
                                         } else {
                                             setResultIndex(resultIndex + 1);
