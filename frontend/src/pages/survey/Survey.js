@@ -1,19 +1,25 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'react-loader-spinner/dist/loader/css/react-spinner-loader.css';
+import './Survey.css';
 
 import React, { createRef, useState } from 'react';
-import { animated, useSpring } from 'react-spring';
+import { animated, interpolate, useSpring, useSprings } from 'react-spring';
 import { toImageURL, toPercentage } from '../../utils/app-utils';
 
 import Button from 'react-bootstrap/Button';
 import Container from 'react-bootstrap/Container';
-import Deck from '../../components/deck/Deck';
+// import Deck from '../../components/deck/Deck';
 import HoverRating from '../../components/hover-rating/HoverRating';
 import Loader from 'react-loader-spinner';
 import NotificationSystem from 'react-notification-system';
 import { SERVER_URL } from '../../utils/consts';
 import axios from 'axios';
 import { firestore as db } from '../../config/firebase';
+
+const to = i => ({ x: 0, y: i * -4, scale: 1, rot: -10 + Math.random() * 20, delay: i * 100 });
+const from = i => ({ x: 0, y: -1000, scale: 1.5, rot: 0 });
+// This is being used down there in the view, it interpolates rotation and scale into a css transform
+const trans = (r, s) => `perspective(1500px) rotateX(30deg) rotateY(${r / 10}deg) rotateZ(${r}deg) scale(${s})`;
 
 const Survey = () => {
     const [showInstructions, setShowInstructions] = useState(true);
@@ -41,12 +47,14 @@ const Survey = () => {
         from: { opacity: 0 },
         config: { duration: 3000 }
     });
+    const [props, set] = useSprings(uniqueResults.length, i => ({ ...to(i), from: from(i) }));
+
     const getSimilar = () => {
         setError(false);
         setLoading(true);
         setGenSpinnerDone(false);
         setSearchSpinnerDone(false);
-        setResultIndex(0);
+        // setResultIndex(0);
         setResults([]);
         setUniqueResults([]);
         setSearchImage(null);
@@ -195,6 +203,7 @@ const Survey = () => {
         //     setLoading(false);
         // });
     };
+    const cards = uniqueResults.map(({ result: { _source: { image_path } } }) => toImageURL(image_path));
 
     const displayImage = () => {
         const {
@@ -218,8 +227,8 @@ const Survey = () => {
                     paddingTop: 50
                 }}
             >
-                <Loader type="Puff" color="#9046CF" height={160} width={160} />
-                <div className="raleway" style={{ color: '#9046CF', marginTop: 20, fontSize: 30 }}>
+                <Loader type="Puff" color="#57737A" height={160} width={160} />
+                <div className="raleway" style={{ color: '#57737A', marginTop: 20, fontSize: 30 }}>
                     Searching for similar images...
                 </div>
             </div>
@@ -231,10 +240,17 @@ const Survey = () => {
                 >
                     Similar Images Found ({uniqueResults.length})
                 </animated.h1>
-                <img
-                    style={{ objectFit: 'cover', float: 'right', height: '70vh', width: '40vw' }}
-                    src={toImageURL(image_path)}
-                />
+                {props.map(({ x, y, rot, scale }, i) => (
+                    <animated.div
+                        className="div"
+                        key={i}
+                        style={{ transform: interpolate([x, y], (x, y) => `translate3d(${x}px,${y}px,0)`) }}
+                    >
+                        <animated.div
+                            style={{ transform: interpolate([rot, scale], trans), backgroundImage: `url(${cards[i]})` }}
+                        />
+                    </animated.div>
+                ))}
             </div>
         );
     };
@@ -271,7 +287,9 @@ const Survey = () => {
                         setTimeout(() => {
                             setGenSpinnerDone(true);
                             if (!loading) {
-                                setTimeout(() => setSearchSpinnerDone(true), 2500);
+                                setTimeout(() => {
+                                    setSearchSpinnerDone(true);
+                                }, 2500);
                             }
                         }, 2500);
                         getSimilar();
@@ -283,13 +301,9 @@ const Survey = () => {
             </div>
         </div>
     );
-    // const survey = (
-
-    // );
 
     return (
         <div style={{ padding: 20 }}>
-            <Deck />
             <NotificationSystem ref={notificationSystem} />
             {showInstructions ? (
                 instructions
@@ -314,8 +328,8 @@ const Survey = () => {
                                 paddingTop: 50
                             }}
                         >
-                            <Loader type="Puff" color="#9046CF" height={160} width={160} />
-                            <div className="raleway" style={{ color: '#9046CF', marginTop: 20, fontSize: 30 }}>
+                            <Loader type="Puff" color="#57737A" height={160} width={160} />
+                            <div className="raleway" style={{ color: '#57737A', marginTop: 20, fontSize: 30 }}>
                                 Generating Random Image
                             </div>
                         </div>
@@ -408,6 +422,17 @@ const Survey = () => {
                                     varient="primary"
                                     onClick={() => {
                                         if (resultIndex === uniqueResults.length - 1) {
+                                            set(i =>
+                                                uniqueResults.length - 1 - resultIndex === i
+                                                    ? {
+                                                          x: 900,
+                                                          rot: -5,
+                                                          scale: 1.1,
+                                                          delay: undefined,
+                                                          config: { friction: 50, tension: 800, isGone: 800 }
+                                                      }
+                                                    : undefined
+                                            );
                                             notificationSystem.current.addNotification({
                                                 title: 'Successfully submitted survey!',
                                                 message: 'Please try doing another one!',
@@ -422,12 +447,26 @@ const Survey = () => {
                                                 setGenSpinnerDone(true);
                                                 if (!loading) {
                                                     console.log('not loading second time');
-                                                    setTimeout(() => setSearchSpinnerDone(true), 2500);
+                                                    setTimeout(() => {
+                                                        setSearchSpinnerDone(true);
+                                                    }, 2500);
                                                 }
                                             }, 2500);
                                         } else {
+                                            set(i =>
+                                                uniqueResults.length - 1 - resultIndex === i
+                                                    ? {
+                                                          x: 900,
+                                                          rot: -5,
+                                                          scale: 1.1,
+                                                          delay: undefined,
+                                                          config: { friction: 50, tension: 800, isGone: 800 }
+                                                      }
+                                                    : undefined
+                                            );
                                             setResultIndex(resultIndex + 1);
                                         }
+
                                         setObjectsRating(2.5);
                                         setBackgroundRating(2.5);
                                         setScenarioRating(2.5);
