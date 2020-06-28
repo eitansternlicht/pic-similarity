@@ -7,11 +7,11 @@ import { toImageURL, toPercentage } from '../../utils/app-utils';
 
 import Button from 'react-bootstrap/Button';
 import Container from 'react-bootstrap/Container';
+import Deck from '../../components/deck/Deck';
 import HoverRating from '../../components/hover-rating/HoverRating';
 import Loader from 'react-loader-spinner';
 import NotificationSystem from 'react-notification-system';
 import { SERVER_URL } from '../../utils/consts';
-import Spinner from 'react-bootstrap/Spinner';
 import axios from 'axios';
 import { firestore as db } from '../../config/firebase';
 
@@ -34,17 +34,13 @@ const Survey = () => {
     const { opacity: genImageOpacity } = useSpring({
         to: { opacity: searchImage && genSpinnerDone ? 1 : 0 },
         from: { opacity: 0 },
-        config: { duration: 3000,  }
+        config: { duration: 3000 }
     });
     const { opacity: similarImageOpacity } = useSpring({
         to: { opacity: uniqueResults.length && searchSpinnerDone ? 1 : 0 },
         from: { opacity: 0 },
         config: { duration: 3000 }
     });
-
-    // const addNotification = () => {
-
-    // };
     const getSimilar = () => {
         setError(false);
         setLoading(true);
@@ -293,6 +289,7 @@ const Survey = () => {
 
     return (
         <div style={{ padding: 20 }}>
+            <Deck />
             <NotificationSystem ref={notificationSystem} />
             {showInstructions ? (
                 instructions
