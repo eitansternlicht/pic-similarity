@@ -256,7 +256,7 @@ const Survey = () => {
     };
     const instructions = (
         <div className="raleway">
-            <h1 style={{ textAlign: 'center', margin: 30 }}>Survey Instructions</h1>
+            <h1 style={{ textAlign: 'center', margin: 30 }}>Instructions</h1>
             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', margin: 10 }}>
                 <h4>Please take into consideration the following:</h4>
             </div>
