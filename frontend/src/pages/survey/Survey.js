@@ -73,7 +73,7 @@ const Survey = () => {
                     .map(result => ({
                         algorithm: 'tfIdf',
                         userRating: {
-                            ratings: { objects: 5, background: 5, scoreRating: 5, scenario: 5 },
+                            ratings: { objects: 5, background: 5, scenario: 5 },
                             similarityScore: toPercentage(result._score)
                         },
                         result
@@ -82,7 +82,7 @@ const Survey = () => {
                         doc2vecResults.map(result => ({
                             algorithm: 'doc2vec',
                             userRating: {
-                                ratings: { objects: 5, background: 5, scoreRating: 5, scenario: 5 },
+                                ratings: { objects: 5, background: 5, scenario: 5 },
                                 similarityScore: toPercentage(result._score)
                             },
                             result
@@ -347,7 +347,7 @@ const Survey = () => {
                                     width: '40vw',
                                     objectFit: 'cover',
                                     float: 'left',
-                                    border: '5px solid red'
+                                    border: '5px solid white'
                                 }}
                                 src={toImageURL(searchImage.image_path)}
                             />

@@ -13,15 +13,15 @@ export const categoriesByTen = {
     90: '90 - 100'
 };
 
-export const similarityToUserRatings = (similarityAlgorithm, docs) => {
+export const similarityToUserRatings = (similarityAlgorithm, docs, ratingType) => {
     const results = {};
     for (const doc of docs) {
         for (const res of doc[similarityAlgorithm].results) {
             const rounded = roundTo10(res.userRating.similarityScore);
-            if (rounded === 100) {
-                console.log('100', res.userRating.similarityScore);
-            }
-            const rating = Math.floor(average(Object.values(res.userRating.ratings)));
+            const rating = ratingType
+                ? res.userRating.ratings[ratingType]
+                : Math.floor(average(Object.values(res.userRating.ratings)));
+
             if (rounded in results) {
                 results[rounded].push(rating);
             } else {
@@ -29,14 +29,13 @@ export const similarityToUserRatings = (similarityAlgorithm, docs) => {
             }
         }
     }
-    console.log('results', results);
     return results;
 };
 
-export const docToGoogleVisionConfidence = similarityAlgorithm => doc => {
+export const docToGoogleVisionConfidence = (similarityAlgorithm, ratingType) => doc => {
     const searchedImageConf = average(doc.searchedImage.labelAnnotations.map(a => a.score));
     return doc[similarityAlgorithm].results.map(res => ({
         x: (average(res.labelAnnotations.map(a => a.score)) * searchedImageConf * 100).toFixed(1),
-        y: average(Object.values(res.userRating.ratings)).toFixed(1)
+        y: ratingType ? res.userRating.ratings[ratingType] : average(Object.values(res.userRating.ratings)).toFixed(1)
     }));
 };

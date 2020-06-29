@@ -32,3 +32,5 @@ export const frequencies = array => {
     }
     return map;
 };
+
+export const uppercaseWord = string => (string ? string[0].toUpperCase() + string.slice(1) : '');

@@ -1,4 +1,4 @@
-import { average, mapValues } from '../../utils/func-utils';
+import { average, mapValues, uppercaseWord } from '../../utils/func-utils';
 import { categoriesByTen, similarityToUserRatings } from '../../utils/chart-utils';
 
 import { ColumnChart } from '@toast-ui/react-chart';
@@ -18,11 +18,9 @@ import React from 'react';
 //     ]
 // };
 
-const options = {
+const toOptions = ratingType => ({
     chart: {
-        width: 800,
-        height: 450,
-        title: 'Average User Rating vs Similarity scores'
+        title: `${uppercaseWord(ratingType)} Average User Rating vs Similarity scores`
     },
     yAxis: {
         title: 'Average User Rating',
@@ -34,9 +32,9 @@ const options = {
         min: 0,
         max: 10
     }
-};
+});
 
-export const toData = scoresDocs => {
+export const toData = (scoresDocs, ratingType) => {
     return {
         categories: Object.values(categoriesByTen).sort(),
         series: [
@@ -44,19 +42,27 @@ export const toData = scoresDocs => {
                 name: 'TF-IDF',
                 data: Object.values({
                     ...mapValues(_ => undefined, categoriesByTen),
-                    ...mapValues(val => average(val).toFixed(1), similarityToUserRatings('tfIdf', scoresDocs))
+                    ...mapValues(
+                        val => average(val).toFixed(1),
+                        similarityToUserRatings('tfIdf', scoresDocs, ratingType)
+                    )
                 })
             },
             {
                 name: 'Doc2Vec',
                 data: Object.values({
                     ...mapValues(_ => undefined, categoriesByTen),
-                    ...mapValues(val => average(val).toFixed(1), similarityToUserRatings('doc2vec', scoresDocs))
+                    ...mapValues(
+                        val => average(val).toFixed(1),
+                        similarityToUserRatings('doc2vec', scoresDocs, ratingType)
+                    )
                 })
             }
         ]
     };
 };
 
-const ChartAverageRating = ({ docs }) => <ColumnChart data={toData(docs)} options={options} />;
+const ChartAverageRating = ({ docs, ratingType }) => (
+    <ColumnChart data={toData(docs, ratingType)} options={toOptions(ratingType)} />
+);
 export default ChartAverageRating;
