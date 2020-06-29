@@ -5,6 +5,9 @@ import cors from 'cors';
 import { generateRandomImagePath } from './db/image-paths';
 import multer from 'multer';
 import { queryElastic } from './db/elastic';
+import { runPerformanceTests } from './performace-tests';
+
+// runPerformanceTests();
 
 const PORT = 3000;
 

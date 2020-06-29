@@ -10,15 +10,18 @@ export const roundTo10 = number => (number === 100 ? 90 : Math.floor(number / 10
 
 export const mapValues = (f, obj) => Object.fromEntries(Object.entries(obj).map(([key, val]) => [key, f(val)]));
 
+export const sum = arrayOfNums => {
+    let total = 0;
+    for (const num of arrayOfNums) {
+        total += num;
+    }
+    return total;
+};
 export const average = arrayOfNums => {
     if (!arrayOfNums) {
         return undefined;
     }
-    let total = 0;
-    for (var i = 0; i < arrayOfNums.length; i++) {
-        total += arrayOfNums[i];
-    }
-    return total / arrayOfNums.length;
+    return sum(arrayOfNums) / arrayOfNums.length;
 };
 
 export const frequencies = array => {
