@@ -1,7 +1,13 @@
+import {
+    docToCombinedSimilarity,
+    docToGoogleVisionConfidence,
+    docToGoogleVisionConfidenceAndSimilarity
+} from '../../utils/chart-utils';
+
 import React from 'react';
 import { ScatterChart } from '@toast-ui/react-chart';
-import { docToGoogleVisionConfidence } from '../../utils/chart-utils';
 import { uppercaseWord } from '../../utils/func-utils';
+
 const toOptions = ratingType => ({
     chart: {
         width: 500,
@@ -24,22 +30,32 @@ const toOptions = ratingType => ({
     }
 });
 
-export const toData = (scoresDocs, ratingType) => {
+export const toData = ({ docs, ratingType, withSimilarity = false }) => {
     return {
         series: [
             {
                 name: 'TF-IDF',
-                data: scoresDocs.flatMap(docToGoogleVisionConfidence('tfIdf', ratingType))
+                data: docs.flatMap(
+                    withSimilarity
+                        ? docToGoogleVisionConfidenceAndSimilarity('tfIdf', ratingType)
+                        : docToGoogleVisionConfidence('tfIdf', ratingType)
+                )
             },
             {
                 name: 'Doc2Vec',
-                data: scoresDocs.flatMap(docToGoogleVisionConfidence('doc2vec', ratingType))
+                data: docs.flatMap(
+                    withSimilarity
+                        ? docToGoogleVisionConfidenceAndSimilarity('doc2vec', ratingType)
+                        : docToGoogleVisionConfidence('doc2vec', ratingType)
+                )
+            },
+            {
+                name: 'Combined',
+                data: docs.flatMap(docToCombinedSimilarity(ratingType))
             }
         ]
     };
 };
 
-const ScatterChartGoogleVision = ({ docs, ratingType }) => (
-    <ScatterChart data={toData(docs, ratingType)} options={toOptions(ratingType)} />
-);
+const ScatterChartGoogleVision = props => <ScatterChart data={toData(props)} options={toOptions(props.ratingType)} />;
 export default ScatterChartGoogleVision;

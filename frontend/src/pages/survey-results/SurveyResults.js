@@ -61,6 +61,7 @@ const SurveyResults = () => {
                     ).toFixed(1)}
             </div>
 
+            <ScatterChartGoogleVision docs={scores} withSimilarity />
             <ScatterChartGoogleVision docs={scores} />
             <div style={{ display: 'flex', flexDirection: 'row', margin: '20px 0' }}>
                 <div style={{ marginRight: 20 }}>

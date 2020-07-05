@@ -2,6 +2,15 @@
 # Created by https://www.toptal.com/developers/gitignore/api/linux,macos,windows,emacs,visualstudiocode,react,node,python,pycharm
 # Edit at https://www.toptal.com/developers/gitignore?templates=linux,macos,windows,emacs,visualstudiocode,react,node,python,pycharm
 
+### Firebase ###
+.idea
+**/node_modules/*
+**/.firebaserc
+
+### Firebase Patch ###
+.runtimeconfig.json
+.firebase/
+
 ### Emacs ###
 # -*- mode: gitignore; -*-
 *~

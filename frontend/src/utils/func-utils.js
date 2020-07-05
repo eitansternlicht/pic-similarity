@@ -37,3 +37,8 @@ export const frequencies = array => {
 };
 
 export const uppercaseWord = string => (string ? string[0].toUpperCase() + string.slice(1) : '');
+
+export const intersection = (arr1, arr2) => {
+    const set2 = new Set(arr2);
+    return arr1.filter(e => set2.has(e));
+};
