@@ -2,7 +2,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 
 import { Route, BrowserRouter as Router, Switch } from 'react-router-dom';
 
-// import App from '../app/App';
+import App from '../app/App';
 // import Home from '../home/Home';
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
@@ -19,17 +19,15 @@ const Main = () => {
                     <h1>PicSimilarity</h1>
                 </Navbar.Brand>
                 <Nav className="mr-auto">
-                    {/* <Nav.Link href="/app">App</Nav.Link> */}
-                    {/* <Nav.Link href="/survey">Survey</Nav.Link> */}
+                    <Nav.Link href="/survey">Survey</Nav.Link>
                     <Nav.Link href="/results">Results</Nav.Link>
                     <Nav.Link href="/performance">Performance</Nav.Link>
                 </Nav>
             </Navbar>
             <Switch>
-                {/* <Route path="/app">
-                    <App />
-                </Route> */}
-
+                <Route path="/survey">
+                    <Survey />
+                </Route>
                 <Route path="/results">
                     <SurveyResults />
                 </Route>
@@ -37,11 +35,8 @@ const Main = () => {
                     <Performance />
                 </Route>
                 <Route path="/">
-                    <Survey />
+                    <App />
                 </Route>
-                {/* <Route path="/">
-                    <Home />
-                </Route> */}
             </Switch>
         </Router>
     );
