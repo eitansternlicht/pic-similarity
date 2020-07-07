@@ -12,7 +12,7 @@ import Spinner from 'react-bootstrap/Spinner';
 import { auth } from '../../config/firebase';
 import axios from 'axios';
 import { toImageURL } from '../../utils/app-utils';
-import { fromByteArray } from 'base64-js';
+import { API } from '../../config/GoogleVision';
 
 const SERVER_URL = `http://localhost:${SERVER_PORT}/upload`;
 
@@ -68,10 +68,7 @@ const App = () => {
         };
 
         axios
-            .post(
-                'https://vision.googleapis.com/v1/images:annotate?key=' + 'AIzaSyAhDVAk0S-yqI3gg5cXpAww2Z3g7CbzJPI',
-                reqBody
-            )
+            .post('https://vision.googleapis.com/v1/images:annotate?key=' + API, reqBody)
             .then(res => console.log(res));
     };
 
