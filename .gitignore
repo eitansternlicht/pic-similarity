@@ -496,3 +496,6 @@ $RECYCLE.BIN/
 backend/static
 backend/ignored-files/
 backend/data_proccessing/
+
+# Google cloud vision configuration
+frontend/src/config/GoogleVision.js
