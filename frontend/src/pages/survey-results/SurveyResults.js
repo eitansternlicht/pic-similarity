@@ -431,7 +431,6 @@ const SurveyResults = () => {
                     </div>
                 </Fade>
             </div>
-            <ScatterChart docs={scores} scoreName="Similarity Score" onlySimilarity withCombined />
 
             <div style={{}}>
                 <Fade bottom>
@@ -469,65 +468,131 @@ const SurveyResults = () => {
                         schools.
                     </h1>
                 </Fade>
-            </div>
 
-            <Fade bottom>
-                <div
-                    style={{
-                        display: 'flex',
-                        flexDirection: 'row',
-                        paddingTop: 50,
-                        paddingBottom: 100,
-                        justifyContent: 'space-evenly'
-                    }}
-                >
-                    <div style={{}}>
-                        <div
-                            style={{
-                                display: 'flex',
-                                flexDirection: 'row',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                textAlign: 'center',
-                                paddingBottom: 30
-                            }}
-                        >
-                            <RangeSlider range={tfIdfRange} setRange={setTfIdfRange} similarityAlgorithm="TF-IDF" />
-                        </div>
-                        <PieCategoryRatings
-                            range={tfIdfRange}
+                <Fade bottom>
+                    <div
+                        style={{
+                            paddingTop: 50,
+                            paddingBottom: 100,
+                            display: 'flex',
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                        }}
+                    >
+                        <ScatterChart
                             docs={scores}
-                            similarityAlgorithm="tfIdf"
-                            algorithmTitle="TF-IDF"
+                            onlySimilarity
+                            withCombined
+                            width={800}
+                            height={650}
+                            title="First"
+                            scoreName="Similarity Score"
                         />
                     </div>
-                    <div>
-                        <div
+                </Fade>
+            </div>
+            <div style={{ backgroundColor: '#8797AF' }}>
+                <div>
+                    <Fade bottom>
+                        <h1
                             style={{
+                                color: '#E6E8EF',
+                                fontSize: '2em',
+                                paddingTop: 50,
                                 display: 'flex',
                                 flexDirection: 'row',
                                 alignItems: 'center',
-                                justifyContent: 'center',
-                                textAlign: 'center',
-                                paddingBottom: 30
+                                justifyContent: 'center'
                             }}
                         >
-                            <RangeSlider
-                                range={doc2vecRange}
-                                setRange={setDoc2vecRange}
-                                similarityAlgorithm="Doc2Vec"
+                            INTRODUCTION
+                        </h1>
+                    </Fade>
+                    <Fade bottom>
+                        <h1
+                            style={{
+                                color: '#E6E8EF',
+                                paddingLeft: 20,
+                                paddingRight: 20,
+                                fontSize: '1.5em',
+                                paddingTop: 15,
+                                display: 'flex',
+                                flexDirection: 'row',
+                                alignItems: 'center',
+                                textAlign: 'center',
+                                justifyContent: 'center'
+                            }}
+                        >
+                            Harvard University President Larry Bacow said in a statement Monday evening that "we are
+                            deeply concerned that the guidance issued today by US Immigration and Customs Enforcement
+                            imposes a blunt, one-size-fits-all approach to a complex problem giving international
+                            students, particularly those in online programs, few options beyond leaving the country or
+                            transferring schools.
+                        </h1>
+                    </Fade>
+                </div>
+
+                <Fade bottom>
+                    <div
+                        style={{
+                            display: 'flex',
+                            flexDirection: 'row',
+                            paddingTop: 50,
+                            paddingBottom: 100,
+                            justifyContent: 'space-evenly'
+                        }}
+                    >
+                        <div style={{}}>
+                            <div
+                                style={{
+                                    color: '#E6E8EF',
+                                    display: 'flex',
+                                    flexDirection: 'row',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    textAlign: 'center',
+                                    paddingBottom: 30
+                                }}
+                            >
+                                <RangeSlider range={tfIdfRange} setRange={setTfIdfRange} similarityAlgorithm="TF-IDF" />
+                            </div>
+                            <PieCategoryRatings
+                                range={tfIdfRange}
+                                docs={scores}
+                                similarityAlgorithm="tfIdf"
+                                algorithmTitle="TF-IDF"
                             />
                         </div>
+                        <div>
+                            <div
+                                style={{
+                                    color: '#E6E8EF',
+                                    display: 'flex',
+                                    flexDirection: 'row',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    textAlign: 'center',
+                                    paddingBottom: 30
+                                }}
+                            >
+                                <RangeSlider
+                                    range={doc2vecRange}
+                                    setRange={setDoc2vecRange}
+                                    similarityAlgorithm="Doc2Vec"
+                                />
+                            </div>
 
-                        <PieCategoryRatings
-                            range={doc2vecRange}
-                            docs={scores}
-                            similarityAlgorithm="doc2vec"
-                            algorithmTitle="Doc2Vec"
-                        />
+                            <PieCategoryRatings
+                                range={doc2vecRange}
+                                docs={scores}
+                                similarityAlgorithm="doc2vec"
+                                algorithmTitle="Doc2Vec"
+                            />
+                        </div>
                     </div>
-                </div>
-            </Fade>
+                </Fade>
+            </div>
         </div>
     );
 };
