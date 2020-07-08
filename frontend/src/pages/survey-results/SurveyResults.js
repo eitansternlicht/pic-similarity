@@ -6,7 +6,7 @@ import ChartAverageRating from '../../components/chart-average-rating/ChartAvera
 import Loader from 'react-loader-spinner';
 import PieCategoryRatings from '../../components/pie-category-ratings/PieCategoryRatings';
 import RangeSlider from '../../components/range-slider/RangeSlider';
-import ScatterChartGoogleVision from '../../components/scatter-chart-google-vision/ScatterChartGoogleVision';
+import ScatterChart from '../../components/scatter-chart/ScatterChart';
 import { average } from '../../utils/func-utils';
 import { firestore as db } from '../../config/firebase';
 
@@ -20,9 +20,7 @@ const SurveyResults = () => {
         db.collection('scores')
             .get()
             .then(results => {
-                const s = results.docs.map(d => d.data());
-                console.log('scoressss', s);
-                setScores(s);
+                setScores(results.docs.map(doc => doc.data()));
                 setLoading(false);
             });
     }, []);
@@ -61,17 +59,22 @@ const SurveyResults = () => {
                     ).toFixed(1)}
             </div>
 
-            <ScatterChartGoogleVision docs={scores} withSimilarity />
-            <ScatterChartGoogleVision docs={scores} />
+            <ScatterChart
+                docs={scores}
+                withSimilarity
+                withCombined
+                scoreName="Similarity Score + Google Vision Confidence"
+            />
+            <ScatterChart docs={scores} scoreName="Google Vision Confidence" />
             <div style={{ display: 'flex', flexDirection: 'row', margin: '20px 0' }}>
                 <div style={{ marginRight: 20 }}>
-                    <ScatterChartGoogleVision docs={scores} ratingType="objects" />
+                    <ScatterChart docs={scores} ratingType="objects" scoreName="Google Vision Confidence" />
                 </div>
                 <div style={{ marginRight: 20 }}>
-                    <ScatterChartGoogleVision docs={scores} ratingType="background" />
+                    <ScatterChart docs={scores} ratingType="background" scoreName="Google Vision Confidence" />
                 </div>
                 <div>
-                    <ScatterChartGoogleVision docs={scores} ratingType="scenario" />
+                    <ScatterChart docs={scores} ratingType="scenario" scoreName="Google Vision Confidence" />
                 </div>
             </div>
             <ChartAverageRating docs={scores} />
@@ -86,6 +89,7 @@ const SurveyResults = () => {
                     <ChartAverageRating docs={scores} ratingType="scenario" />
                 </div>
             </div>
+            <ScatterChart docs={scores} scoreName="Similarity Score" onlySimilarity withCombined />
 
             <div style={{ display: 'flex', flexDirection: 'row', margin: 20 }}>
                 <div style={{ marginRight: 50 }}>

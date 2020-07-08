@@ -1,7 +1,7 @@
 import { PieChart } from '@toast-ui/react-chart';
 import React from 'react';
 import { frequencies } from '../../utils/func-utils';
-import { similarityToUserRatings } from '../../utils/chart-utils';
+import { similarityGroupsToUserRatings } from '../../utils/chart-utils';
 
 const toOptions = algorithmTitle => ({
     chart: {
@@ -18,7 +18,7 @@ const toOptions = algorithmTitle => ({
 export const toData = (similarityAlgorithm, scoresDocs, range) => {
     const totalRatings = [];
     for (let i = range[0]; i < range[1]; i += 10) {
-        const rangeRatings = similarityToUserRatings(similarityAlgorithm, scoresDocs)[i];
+        const rangeRatings = similarityGroupsToUserRatings(similarityAlgorithm, scoresDocs)[i];
         if (rangeRatings) {
             totalRatings.push(...rangeRatings);
         }

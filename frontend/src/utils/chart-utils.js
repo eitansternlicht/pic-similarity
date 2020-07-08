@@ -12,8 +12,38 @@ export const categoriesByTen = {
     80: '80 - 90',
     90: '90 - 100'
 };
-
 export const similarityToUserRatings = (similarityAlgorithm, docs, ratingType) => {
+    const res = docs.flatMap(doc =>
+        doc[similarityAlgorithm].results.map(({ userRating: { ratings, similarityScore } }) => {
+            const r = {
+                y: average(Object.values(ratings)),
+                x: similarityScore
+            };
+            console.log('flaa', ratings);
+            return r;
+        })
+    );
+    console.log('blaa', res);
+    return res;
+    const results = {};
+    for (const doc of docs) {
+        for (const res of doc[similarityAlgorithm].results) {
+            const rounded = roundTo10(res.userRating.similarityScore);
+            const rating = ratingType
+                ? res.userRating.ratings[ratingType]
+                : Math.floor(average(Object.values(res.userRating.ratings)));
+
+            if (rounded in results) {
+                results[rounded].push(rating);
+            } else {
+                results[rounded] = [rating];
+            }
+        }
+    }
+    return results;
+};
+
+export const similarityGroupsToUserRatings = (similarityAlgorithm, docs, ratingType) => {
     const results = {};
     for (const doc of docs) {
         for (const res of doc[similarityAlgorithm].results) {
@@ -42,25 +72,16 @@ export const docToGoogleVisionConfidence = (similarityAlgorithm, ratingType) => 
 
 export const docToGoogleVisionConfidenceAndSimilarity = (similarityAlgorithm, ratingType) => doc => {
     const searchedImageConf = average(doc.searchedImage.labelAnnotations.map(a => a.score));
-    return doc[similarityAlgorithm].results.map(res => {
-        console.log(
-            'rating',
-
-            [average(res.labelAnnotations.map(a => a.score)), searchedImageConf, res.userRating.similarityScore]
-        );
-        return {
-            x: (
-                average([
-                    average(res.labelAnnotations.map(a => a.score)),
-                    searchedImageConf,
-                    res.userRating.similarityScore / 100
-                ]) * 100
-            ).toFixed(1),
-            y: ratingType
-                ? res.userRating.ratings[ratingType]
-                : average(Object.values(res.userRating.ratings)).toFixed(1)
-        };
-    });
+    return doc[similarityAlgorithm].results.map(res => ({
+        x: (
+            average([
+                average(res.labelAnnotations.map(a => a.score)),
+                searchedImageConf,
+                res.userRating.similarityScore / 100
+            ]) * 100
+        ).toFixed(1),
+        y: ratingType ? res.userRating.ratings[ratingType] : average(Object.values(res.userRating.ratings)).toFixed(1)
+    }));
 };
 
 export const docToCombinedSimilarity = ratingType => doc => {
@@ -89,19 +110,4 @@ export const docToCombinedSimilarity = ratingType => doc => {
             ? tfIdf.userRating.ratings[ratingType]
             : average(Object.values(tfIdf.userRating.ratings)).toFixed(1)
     }));
-
-    // return doc[similarityAlgorithm].results.map(res => {
-    //     return {
-    //         x: (
-    //             average([
-    //                 average(res.labelAnnotations.map(a => a.score)),
-    //                 searchedImageConf,
-    //                 res.userRating.similarityScore / 100
-    //             ]) * 100
-    //         ).toFixed(1),
-    //         y: ratingType
-    //             ? res.userRating.ratings[ratingType]
-    //             : average(Object.values(res.userRating.ratings)).toFixed(1)
-    //     };
-    // });
 };

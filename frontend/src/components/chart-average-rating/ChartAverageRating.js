@@ -1,5 +1,5 @@
 import { average, mapValues, uppercaseWord } from '../../utils/func-utils';
-import { categoriesByTen, similarityToUserRatings } from '../../utils/chart-utils';
+import { categoriesByTen, similarityGroupsToUserRatings } from '../../utils/chart-utils';
 
 import { ColumnChart } from '@toast-ui/react-chart';
 import React from 'react';
@@ -44,7 +44,7 @@ export const toData = (scoresDocs, ratingType) => {
                     ...mapValues(_ => undefined, categoriesByTen),
                     ...mapValues(
                         val => average(val).toFixed(1),
-                        similarityToUserRatings('tfIdf', scoresDocs, ratingType)
+                        similarityGroupsToUserRatings('tfIdf', scoresDocs, ratingType)
                     )
                 })
             },
@@ -54,7 +54,7 @@ export const toData = (scoresDocs, ratingType) => {
                     ...mapValues(_ => undefined, categoriesByTen),
                     ...mapValues(
                         val => average(val).toFixed(1),
-                        similarityToUserRatings('doc2vec', scoresDocs, ratingType)
+                        similarityGroupsToUserRatings('doc2vec', scoresDocs, ratingType)
                     )
                 })
             }
