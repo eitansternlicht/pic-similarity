@@ -1,15 +1,20 @@
+import { DataDoc, initTfIdfData, labelAnnotationsToTerms, readJSON, tf_to_tfIdf } from './db/migrator';
 import express, { static as expressStatic } from 'express';
 import { json, urlencoded } from 'body-parser';
+import { queryElastic, queryElasticByVectors } from './db/elastic';
 
 import axios from 'axios';
 import cors from 'cors';
+import { frequencies } from './utils/func-utils';
 import { generateRandomImagePath } from './db/image-paths';
-import { labelAnnotationsToTerms } from './db/migrator';
 import multer from 'multer';
-import { queryElastic } from './db/elastic';
 import { runPerformanceTests } from './performace-tests';
 
 // runPerformanceTests();
+const { termToId, termToIdf } = initTfIdfData(readJSON('db/docs.esdata'));
+
+// console.log('termToId', termToId);
+// console.log('termToIdf', termToIdf);
 
 const PORT = 3000;
 
@@ -32,7 +37,25 @@ App.get('/random', (_, response) =>
 
 App.post('/query-annotations', (req, response) => {
     const terms = labelAnnotationsToTerms(req.body);
-    axios.post('http://localhost:8000', terms).then(res => console.log('RESULT', res.data));
+    Promise.all([
+        axios.post('http://localhost:8000', terms),
+        Promise.resolve().then(() => {
+            const freqs = frequencies(terms);
+            const tf_vector = Object.fromEntries(
+                Object.entries(freqs).map(([term, freq]) => [term, freq / terms.length])
+            );
+            const termToTfIdf = tf_to_tfIdf(termToIdf, tf_vector);
+            const sparseVecTfIdf = Object.fromEntries(
+                Object.entries(termToTfIdf).map(([term, tfIdf]) => [termToId[term], tfIdf])
+            );
+            return sparseVecTfIdf;
+        })
+    ]).then(([doc2vecVectorResults, tfIdfVector]) => {
+        const doc2vecVector = doc2vecVectorResults.data;
+        queryElasticByVectors({ tfIdfVector, doc2vecVector }).then(res => {
+            response.json(res);
+        });
+    });
 });
 
 // labelAnnotationsToTerms

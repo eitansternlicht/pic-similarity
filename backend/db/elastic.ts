@@ -12,7 +12,7 @@ const querySimilarity = (
     queryVector: any
 ) => {
     const source = `${elasticSimilarityFunction}(params.queryVector, doc['${elasticDocVectorFieldName}']) + 1.0`;
-    return client.search({
+    const queryBody = {
         index: ELASTIC_DB_NAME,
         size,
         body: {
@@ -30,7 +30,9 @@ const querySimilarity = (
                 }
             }
         }
-    });
+    };
+    console.log('queryBody', JSON.stringify(queryBody, null, '\t'));
+    return client.search(queryBody);
 };
 
 const queryExact = (imageFilename: string) =>
@@ -71,11 +73,15 @@ export const queryElastic = async (searchImage: string) => {
     };
 };
 
-export const queryElasticByVectors = async ({ tfIdf_vector, doc2vec_vector }) => {
-    const tfIdfResults = await querySimilarity('cosineSimilaritySparse', 'tfIdf_vector', 5, tfIdf_vector);
-    const doc2vecResults = await querySimilarity('cosineSimilarity', 'doc2vec_vector', 5, doc2vec_vector);
-    return {
-        tfIdf: tfIdfResults,
-        doc2vec: doc2vecResults
-    };
+export const queryElasticByVectors = async ({ tfIdfVector, doc2vecVector }) => {
+    try {
+        const tfIdfResults = await querySimilarity('cosineSimilaritySparse', 'tfIdf_vector', 5, tfIdfVector);
+        const doc2vecResults = await querySimilarity('cosineSimilarity', 'doc2vec_vector', 5, doc2vecVector);
+        return {
+            tfIdf: tfIdfResults,
+            doc2vec: doc2vecResults
+        };
+    } catch (e) {
+        console.log('errrrr', e);
+    }
 };

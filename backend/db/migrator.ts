@@ -1,5 +1,6 @@
 import { readFileSync, writeFileSync } from 'fs';
 
+import { frequencies } from '../utils/func-utils';
 import path from 'path';
 
 // termToIdf = {"elephant": 23, "sky": 501, ...}
@@ -124,6 +125,53 @@ export const addTfIdfVector = (docs: DataDoc[]): { [key in SparseVectorID]: Term
     return flip(termToId);
 };
 
+export const initTfIdfData = (docs: DataDoc[]) => {
+    const numOfDocs = docs.length;
+    const allTerms: Set<Term> = new Set([]);
+    const termToDocSet: { [key in Term]: Set<DocID> } = {};
+    // const docToTfVector: { [key in DocID]: { [key in Term]: number } } = {};
+    for (const doc of docs) {
+        const docTerms = [];
+        for (const phraseObj of doc._source.labelAnnotations) {
+            const terms = toTerms(phraseObj.description);
+            addValues(allTerms, terms);
+            docTerms.push(...terms);
+            for (const term of terms) {
+                if (termToDocSet[term]) {
+                    termToDocSet[term].add(doc._id);
+                } else {
+                    termToDocSet[term] = new Set([doc._id]);
+                }
+            }
+        }
+        // const freqs = frequencies(docTerms);
+        // const tf_vector = Object.fromEntries(
+        //     Object.entries(freqs).map(([term, freq]) => [term, freq / docTerms.length])
+        // );
+        // docToTfVector[doc._id] = tf_vector;
+    }
+
+    const termToIdf = Object.fromEntries(
+        Object.entries(termToDocSet).map(([term, setOfDocs]) => [term, Math.log10(numOfDocs / setOfDocs.size)])
+    );
+    // create dictionary
+    const sortedTerms = Array.from(allTerms).sort(); // ["a", "b", "c"]
+    // console.log('sortedTerms', sortedTerms.slice(0, 50));
+    // ["a", "b", "c"] => {"0": "a", "1": "b", "2": "c"}
+    const termToId = Object.fromEntries(sortedTerms.map((term, i) => [term, '' + i]));
+
+    // adds a TF-IDF sparse vector to each doc
+    // for (const doc of docs) {
+    //     const termToTfIdf = tf_to_tfIdf(termToIdf, docToTfVector[doc._id]);
+    //     const sparseVecTfIdf = Object.fromEntries(
+    //         Object.entries(termToTfIdf).map(([term, tfIdf]) => [termToId[term], tfIdf])
+    //     );
+    //     delete doc._source.tf_vector;
+    //     doc._source['tfIdf_vector'] = sparseVecTfIdf;
+    // }
+    return { termToId, termToIdf };
+};
+
 export const toTerms = (str: string): string[] =>
     str
         .toLowerCase()
@@ -167,19 +215,6 @@ export const add_tfIdf_vectors = (termToIdf: { [key in Term]: number }, docs: Da
     for (const doc of docs) {
         doc._source['tfIdf_vector'] = tf_to_tfIdf(termToIdf, doc._source.tf_vector);
     }
-};
-
-// frequencies([100, 200, 300, 100]) = {100: 2, 200: 1, 300: 1}
-const frequencies = (arr: any[]): { [key in any]: number } => {
-    const freqs = {};
-    for (const elem of arr) {
-        if (freqs[elem]) {
-            freqs[elem] += 1;
-        } else {
-            freqs[elem] = 1;
-        }
-    }
-    return freqs;
 };
 
 function addValues<T>(set: Set<T>, values: T[]): void {
@@ -293,8 +328,8 @@ export const createDocTokensFile = (docsFile: string, outputDocTokensFile: strin
     writeFileSync(outputDocTokensFile, doc2vecInputFile);
 };
 
-export const labelAnnotationsToTerms = (labelAnnotations: {description: string}[]) => 
-    labelAnnotations.flatMap(({description}) => toTerms(description))
+export const labelAnnotationsToTerms = (labelAnnotations: { description: string }[]) =>
+    labelAnnotations.flatMap(({ description }) => toTerms(description));
 // console.log(docsVectors);
 
 // classifyImage(imagePath).then(predictions => {

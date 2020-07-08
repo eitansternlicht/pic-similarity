@@ -1,5 +1,7 @@
 import os
 import json
+from json import JSONEncoder
+import numpy
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from io import BytesIO
 from gensim.models.doc2vec import TaggedDocument, Doc2Vec
@@ -31,6 +33,13 @@ def write_doc_vectors(model, output_filename):
                    for i in range(len(model.docvecs))], f)
 
 
+class NumpyArrayEncoder(JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, numpy.ndarray):
+            return obj.tolist()
+        return JSONEncoder.default(self, obj)
+
+
 class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         self.send_response(200)
@@ -41,15 +50,12 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
         content_length = int(self.headers['Content-Length'])
         body = self.rfile.read(content_length)
         labelAnnotations = json.loads(body)
-        print('llaaaaaaaaaaaaaaazaaaaaaa')
         print(labelAnnotations)
         vec = model.infer_vector(labelAnnotations)
         self.send_response(200)
         self.end_headers()
         response = BytesIO()
-        response.write(b'This is POST request. ')
-        response.write(b'Received: ')
-        response.write(str.encode(str(vec)))
+        response.write(str.encode(json.dumps(vec, cls=NumpyArrayEncoder)))
         self.wfile.write(response.getvalue())
 
 
