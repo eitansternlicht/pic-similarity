@@ -8,11 +8,11 @@ import React from 'react';
 import { ScatterChart } from '@toast-ui/react-chart';
 import { uppercaseWord } from '../../utils/func-utils';
 
-const toOptions = ratingType => ({
+const toOptions = ({ ratingType, width, height, title }) => ({
     chart: {
-        width: 500,
-        height: 400,
-        title: ''
+        width,
+        height,
+        title
     },
     yAxis: {
         title: `${uppercaseWord(ratingType)} User Rating`,
@@ -57,5 +57,5 @@ export const toData = ({ docs, ratingType, withSimilarity = false }) => {
     };
 };
 
-const ScatterChartGoogleVision = props => <ScatterChart data={toData(props)} options={toOptions(props.ratingType)} />;
+const ScatterChartGoogleVision = props => <ScatterChart data={toData(props)} options={toOptions(props)} />;
 export default ScatterChartGoogleVision;

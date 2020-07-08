@@ -18,8 +18,10 @@ import React from 'react';
 //     ]
 // };
 
-const toOptions = ratingType => ({
+const toOptions = ({ ratingType, width, height }) => ({
     chart: {
+        width,
+        height,
         title: `${uppercaseWord(ratingType)} Average User Rating vs Similarity scores`
     },
     yAxis: {
