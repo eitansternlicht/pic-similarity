@@ -2,7 +2,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import 'react-loader-spinner/dist/loader/css/react-spinner-loader.css';
 import './Survey.css';
 
-import React, { createRef, useState } from 'react';
+import React, { createRef, useState, useEffect } from 'react';
 import { animated, interpolate, useSpring, useSprings } from 'react-spring';
 import { toImageURL, toPercentage } from '../../utils/app-utils';
 
@@ -15,7 +15,6 @@ import NotificationSystem from 'react-notification-system';
 import { SERVER_URL } from '../../utils/consts';
 import axios from 'axios';
 import { firestore as db } from '../../config/firebase';
-
 const to = i => ({ x: 0, y: i * -4, scale: 1, rot: -10 + Math.random() * 20, delay: i * 100 });
 const from = i => ({ x: 0, y: -1000, scale: 1.5, rot: 0 });
 // This is being used down there in the view, it interpolates rotation and scale into a css transform
@@ -36,6 +35,18 @@ const Survey = () => {
     const [scenarioRating, setScenarioRating] = useState(2.5);
     const [genSpinnerDone, setGenSpinnerDone] = useState(false);
     const [searchSpinnerDone, setSearchSpinnerDone] = useState(false);
+    const [windowSize, setWindowSize] = useState({ width: window.innerWidth, height: window.innerWidth });
+
+    const update = () => {
+        console.log('width', window.innerWidth);
+        setWindowSize({
+            width: window.innerWidth,
+            height: window.innerHeight
+        });
+    };
+    useEffect(() => {
+        window.addEventListener('resize', update);
+    }, []);
     const notificationSystem = createRef();
     const { opacity: genImageOpacity } = useSpring({
         to: { opacity: searchImage && genSpinnerDone ? 1 : 0 },
@@ -301,189 +312,200 @@ const Survey = () => {
             </div>
         </div>
     );
-
-    return (
-        <div style={{ padding: 20 }}>
-            <NotificationSystem ref={notificationSystem} />
-            {showInstructions ? (
-                instructions
-            ) : (
-                <div
-                    style={{
-                        display: 'flex',
-                        flexDirection: 'row',
-                        justifyContent: 'space-between',
-                        marginTop: 30
-                    }}
-                >
-                    {loading || !genSpinnerDone || !searchImage ? (
-                        <div
-                            style={{
-                                height: '70vh',
-                                width: '40vw',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                flexDirection: 'column',
-                                paddingTop: 50
-                            }}
-                        >
-                            <Loader type="Puff" color="#57737A" height={160} width={160} />
-                            <div className="raleway" style={{ color: '#57737A', marginTop: 20, fontSize: 30 }}>
-                                Generating Random Image
-                            </div>
-                        </div>
-                    ) : (
-                        <div>
-                            <animated.h1
-                                className="raleway"
-                                style={{ textAlign: 'center', marginBottom: 10, opacity: genImageOpacity }}
-                            >
-                                Generated Random Image
-                            </animated.h1>
-                            <img
+    if (windowSize.width > 1130) {
+        return (
+            <div style={{ padding: 20 }}>
+                <NotificationSystem ref={notificationSystem} />
+                {showInstructions ? (
+                    instructions
+                ) : (
+                    <div
+                        style={{
+                            display: 'flex',
+                            flexDirection: 'row',
+                            justifyContent: 'space-between',
+                            marginTop: 30
+                        }}
+                    >
+                        {loading || !genSpinnerDone || !searchImage ? (
+                            <div
                                 style={{
                                     height: '70vh',
                                     width: '40vw',
-                                    objectFit: 'cover',
-                                    float: 'left',
-                                    border: '5px solid white'
-                                }}
-                                src={toImageURL(searchImage.image_path)}
-                            />
-                        </div>
-                    )}
-
-                    {!loading && genSpinnerDone && searchSpinnerDone && uniqueResults.length ? (
-                        <div
-                            style={{
-                                paddingLeft: '20px',
-                                width: '20vw',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                flexDirection: 'column'
-                            }}
-                        >
-                            <h3 className="raleway" style={{ marginBottom: 40 }}>
-                                Rate Similarity
-                            </h3>
-
-                            <h6>Objects</h6>
-                            <div style={{ marginBottom: 20 }}>
-                                <HoverRating
-                                    ratingName={'objectsRating'}
-                                    rating={objectsRating}
-                                    setRating={newRating => {
-                                        const newResults = [...uniqueResults];
-                                        newResults[resultIndex].userRating.ratings.objects = Math.floor(newRating * 2);
-                                        setUniqueResults(newResults);
-                                        setObjectsRating(newRating);
-                                    }}
-                                />
-                            </div>
-                            <h6>Background & Color</h6>
-
-                            <div style={{ marginBottom: 20 }}>
-                                <HoverRating
-                                    ratingName={'backgroundRating'}
-                                    rating={backgroundRating}
-                                    setRating={newRating => {
-                                        const newResults = [...uniqueResults];
-                                        newResults[resultIndex].userRating.ratings.background = Math.floor(
-                                            newRating * 2
-                                        );
-                                        setUniqueResults(newResults);
-                                        setBackgroundRating(newRating);
-                                    }}
-                                />
-                            </div>
-                            <h6>Situation / Scenario</h6>
-
-                            <div>
-                                <HoverRating
-                                    ratingName={'scenarioRating'}
-                                    rating={scenarioRating}
-                                    setRating={newRating => {
-                                        const newResults = [...uniqueResults];
-                                        newResults[resultIndex].userRating.ratings.scenario = Math.floor(newRating * 2);
-                                        setUniqueResults(newResults);
-                                        setScenarioRating(newRating);
-                                    }}
-                                />
-                            </div>
-                            <div
-                                style={{
-                                    textAlign: 'center'
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    flexDirection: 'column',
+                                    paddingTop: 50
                                 }}
                             >
-                                <Button
-                                    style={{ marginTop: 50 }}
-                                    varient="primary"
-                                    onClick={() => {
-                                        if (resultIndex === uniqueResults.length - 1) {
-                                            set(i =>
-                                                uniqueResults.length - 1 - resultIndex === i
-                                                    ? {
-                                                          x: 900,
-                                                          rot: -5,
-                                                          scale: 1.1,
-                                                          delay: undefined,
-                                                          config: { friction: 50, tension: 800, isGone: 800 }
-                                                      }
-                                                    : undefined
-                                            );
-                                            notificationSystem.current.addNotification({
-                                                title: 'Successfully submitted survey!',
-                                                message: 'Please try doing another one!',
-                                                level: 'success'
-                                            });
-                                            addVoteToFirebase();
-                                            getSimilar();
-
-                                            setQueryTime({ tfIdf: null, doc2vec: null });
-
-                                            setTimeout(() => {
-                                                setGenSpinnerDone(true);
-                                                if (!loading) {
-                                                    console.log('not loading second time');
-                                                    setTimeout(() => {
-                                                        setSearchSpinnerDone(true);
-                                                    }, 2500);
-                                                }
-                                            }, 2500);
-                                        } else {
-                                            set(i =>
-                                                uniqueResults.length - 1 - resultIndex === i
-                                                    ? {
-                                                          x: 900,
-                                                          rot: -5,
-                                                          scale: 1.1,
-                                                          delay: undefined,
-                                                          config: { friction: 50, tension: 800, isGone: 800 }
-                                                      }
-                                                    : undefined
-                                            );
-                                            setResultIndex(resultIndex + 1);
-                                        }
-
-                                        setObjectsRating(2.5);
-                                        setBackgroundRating(2.5);
-                                        setScenarioRating(2.5);
-                                        console.log('uniqueResults', uniqueResults);
-                                    }}
-                                    type="submit"
-                                >
-                                    Submit Ratings
-                                </Button>
+                                <Loader type="Puff" color="#57737A" height={160} width={160} />
+                                <div className="raleway" style={{ color: '#57737A', marginTop: 20, fontSize: 30 }}>
+                                    Generating Random Image
+                                </div>
                             </div>
-                        </div>
-                    ) : null}
-                    {!loading && genSpinnerDone && uniqueResults.length ? displayImage() : null}
-                </div>
-            )}
-        </div>
-    );
+                        ) : (
+                            <div>
+                                <animated.h1
+                                    className="raleway"
+                                    style={{ textAlign: 'center', marginBottom: 10, opacity: genImageOpacity }}
+                                >
+                                    Generated Random Image
+                                </animated.h1>
+                                <img
+                                    style={{
+                                        height: '70vh',
+                                        width: '40vw',
+                                        objectFit: 'cover',
+                                        float: 'left',
+                                        border: '5px solid white'
+                                    }}
+                                    src={toImageURL(searchImage.image_path)}
+                                />
+                            </div>
+                        )}
+
+                        {!loading && genSpinnerDone && searchSpinnerDone && uniqueResults.length ? (
+                            <div
+                                style={{
+                                    paddingLeft: '20px',
+                                    width: '20vw',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    flexDirection: 'column'
+                                }}
+                            >
+                                <h3 className="raleway" style={{ marginBottom: 40 }}>
+                                    Rate Similarity
+                                </h3>
+
+                                <h6>Objects</h6>
+                                <div style={{ marginBottom: 20 }}>
+                                    <HoverRating
+                                        ratingName={'objectsRating'}
+                                        rating={objectsRating}
+                                        setRating={newRating => {
+                                            const newResults = [...uniqueResults];
+                                            newResults[resultIndex].userRating.ratings.objects = Math.floor(
+                                                newRating * 2
+                                            );
+                                            setUniqueResults(newResults);
+                                            setObjectsRating(newRating);
+                                        }}
+                                    />
+                                </div>
+                                <h6>Background & Color</h6>
+
+                                <div style={{ marginBottom: 20 }}>
+                                    <HoverRating
+                                        ratingName={'backgroundRating'}
+                                        rating={backgroundRating}
+                                        setRating={newRating => {
+                                            const newResults = [...uniqueResults];
+                                            newResults[resultIndex].userRating.ratings.background = Math.floor(
+                                                newRating * 2
+                                            );
+                                            setUniqueResults(newResults);
+                                            setBackgroundRating(newRating);
+                                        }}
+                                    />
+                                </div>
+                                <h6>Situation / Scenario</h6>
+
+                                <div>
+                                    <HoverRating
+                                        ratingName={'scenarioRating'}
+                                        rating={scenarioRating}
+                                        setRating={newRating => {
+                                            const newResults = [...uniqueResults];
+                                            newResults[resultIndex].userRating.ratings.scenario = Math.floor(
+                                                newRating * 2
+                                            );
+                                            setUniqueResults(newResults);
+                                            setScenarioRating(newRating);
+                                        }}
+                                    />
+                                </div>
+                                <div
+                                    style={{
+                                        textAlign: 'center'
+                                    }}
+                                >
+                                    <Button
+                                        style={{ marginTop: 50 }}
+                                        varient="primary"
+                                        onClick={() => {
+                                            if (resultIndex === uniqueResults.length - 1) {
+                                                set(i =>
+                                                    uniqueResults.length - 1 - resultIndex === i
+                                                        ? {
+                                                              x: 900,
+                                                              rot: -5,
+                                                              scale: 1.1,
+                                                              delay: undefined,
+                                                              config: { friction: 50, tension: 800, isGone: 800 }
+                                                          }
+                                                        : undefined
+                                                );
+                                                notificationSystem.current.addNotification({
+                                                    title: 'Successfully submitted survey!',
+                                                    message: 'Please try doing another one!',
+                                                    level: 'success'
+                                                });
+                                                addVoteToFirebase();
+                                                getSimilar();
+
+                                                setQueryTime({ tfIdf: null, doc2vec: null });
+
+                                                setTimeout(() => {
+                                                    setGenSpinnerDone(true);
+                                                    if (!loading) {
+                                                        console.log('not loading second time');
+                                                        setTimeout(() => {
+                                                            setSearchSpinnerDone(true);
+                                                        }, 2500);
+                                                    }
+                                                }, 2500);
+                                            } else {
+                                                set(i =>
+                                                    uniqueResults.length - 1 - resultIndex === i
+                                                        ? {
+                                                              x: 900,
+                                                              rot: -5,
+                                                              scale: 1.1,
+                                                              delay: undefined,
+                                                              config: { friction: 50, tension: 800, isGone: 800 }
+                                                          }
+                                                        : undefined
+                                                );
+                                                setResultIndex(resultIndex + 1);
+                                            }
+
+                                            setObjectsRating(2.5);
+                                            setBackgroundRating(2.5);
+                                            setScenarioRating(2.5);
+                                            console.log('uniqueResults', uniqueResults);
+                                        }}
+                                        type="submit"
+                                    >
+                                        Submit Ratings
+                                    </Button>
+                                </div>
+                            </div>
+                        ) : null}
+                        {!loading && genSpinnerDone && uniqueResults.length ? displayImage() : null}
+                    </div>
+                )}
+            </div>
+        );
+    } else {
+        return (
+            <div className="raleway">
+                <h1 style={{ textAlign: 'center', paddingTop: 250 }}>THE WEB BROWSER YOU ARE USING IS SHIT</h1>
+            </div>
+        );
+    }
 };
 
 export default Survey;
