@@ -503,7 +503,7 @@ const Survey = () => {
     } else {
         return (
             <div className="raleway">
-                <h1 style={{ textAlign: 'center', paddingTop: 250 }}>THE WEB BROWSER YOU ARE USING IS SHIT</h1>
+                <h1 style={{ textAlign: 'center', paddingTop: 250 }}>Please use your desktop browser in full screen</h1>
             </div>
         );
     }
