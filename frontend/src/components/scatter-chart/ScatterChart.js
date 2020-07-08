@@ -10,11 +10,11 @@ import { ScatterChart as ReactScatterChart } from '@toast-ui/react-chart';
 import { correlation } from '../../utils/pearson-correlation';
 import { uppercaseWord } from '../../utils/func-utils';
 
-const toOptions = (ratingType, scoreName) => ({
+const toOptions = ({ ratingType, scoreName, title, width, height }) => ({
     chart: {
-        width: 500,
-        height: 400,
-        title: ''
+        width,
+        height,
+        title
     },
     yAxis: {
         title: `${uppercaseWord(ratingType)} User Rating`,
@@ -77,7 +77,7 @@ const ScatterChart = props => {
     const correlationData = data.series.map(({ name, data }) => [name, toCorrelation(data).toFixed(3)]);
     return (
         <div>
-            <ReactScatterChart data={data} options={toOptions(props.ratingType, props.scoreName)} />
+            <ReactScatterChart data={data} options={toOptions(props)} />
             {correlationData.map(([algorithm, correlationScore]) => (
                 <div key={algorithm}>
                     {algorithm} Correlation: {correlationScore}

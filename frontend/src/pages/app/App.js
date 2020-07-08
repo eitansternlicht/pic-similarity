@@ -12,6 +12,7 @@ import Spinner from 'react-bootstrap/Spinner';
 import { auth } from '../../config/firebase';
 import axios from 'axios';
 import { toImageURL } from '../../utils/app-utils';
+import { API } from '../../config/GoogleVision';
 
 const SERVER_URL = `http://localhost:${SERVER_PORT}/upload`;
 
@@ -31,6 +32,50 @@ const App = () => {
     const onChangeFilePicker = event => {
         setSearchImage(event.target.files[0]);
     };
+
+    function uploadFiles(event) {
+        event.stopPropagation(); // Stop stuff happening
+        event.preventDefault(); // Totally stop stuff happening
+
+        //Grab the file and asynchronously convert to base64.
+        var file = searchImage;
+        var reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onloadend = processFile;
+    }
+
+    function processFile(event) {
+        const encodedFile = event.target.result.replace('data:image/jpeg;base64,', '');
+
+        //console.log(fromByteArray(encodedFile));
+        sendFiletoCloudVision(encodedFile);
+    }
+
+    const sendFiletoCloudVision = encodedFile => {
+        const reqBody = {
+            requests: [
+                {
+                    image: {
+                        content: encodedFile
+                    },
+                    features: [
+                        {
+                            type: 'LABEL_DETECTION'
+                        }
+                    ]
+                }
+            ]
+        };
+
+        axios
+            .post('https://vision.googleapis.com/v1/images:annotate?key=' + API, reqBody)
+            .then(res => console.log(res));
+    };
+
+    const onClickGetGoogleVisionResults = () => {
+        alert("i'm here");
+    };
+
     const onClickGetSimilar = () => {
         setClearScreen(false);
         setError(false);
@@ -126,6 +171,16 @@ const App = () => {
                 style={{ marginRight: 10 }}
             >
                 Get Similar
+            </Button>
+
+            <Button
+                varient="primary"
+                onClick={uploadFiles}
+                type="submit"
+                disabled={!searchImage}
+                style={{ marginRight: 10 }}
+            >
+                Google cloud vision
             </Button>
             {loading ? <Spinner animation="border" /> : null}
 
