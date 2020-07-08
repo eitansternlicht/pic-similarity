@@ -2,19 +2,17 @@
 import './App.css';
 
 import React, { useState } from 'react';
+import { SERVER_PORT, SERVER_URL } from '../../utils/consts';
 
 import { API } from '../../config/GoogleVision';
 import Button from 'react-bootstrap/Button';
 import Card from 'react-bootstrap/Card';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
-import { SERVER_PORT } from '../../utils/consts';
 import Spinner from 'react-bootstrap/Spinner';
 import { auth } from '../../config/firebase';
 import axios from 'axios';
 import { toImageURL } from '../../utils/app-utils';
-
-const SERVER_URL = `http://localhost:${SERVER_PORT}/upload`;
 
 const App = () => {
     const [imageDescriptions, setImageDescriptions] = useState('');
@@ -70,9 +68,39 @@ const App = () => {
             ]
         };
 
-        axios
-            .post('https://vision.googleapis.com/v1/images:annotate?key=' + API, reqBody)
-            .then(res => console.log(res));
+        axios.post('https://vision.googleapis.com/v1/images:annotate?key=' + API, reqBody).then(res => {
+            if (res) {
+                const { labelAnnotations } = res.data.responses[0];
+                console.log('Google vision results', labelAnnotations);
+                axios.post(`${SERVER_URL}/query-annotations`, labelAnnotations).then(
+                    queryResults => {
+                        console.log('queryResults', queryResults);
+                        if (queryResults && queryResults.data) {
+                            setResults(queryResults.data);
+                        }
+                    },
+                    errpr => console.log('errr', errpr)
+                );
+            }
+
+            // .post(`${SERVER_URL}/query-annotations`, [
+            //     { mid: '/m/01bqvp', description: 'Sky', score: 0.9874151, topicality: 0.9874151 },
+            //     { mid: '/m/01ctsf', description: 'Atmosphere', score: 0.8894614, topicality: 0.8894614 },
+            //     {
+            //         mid: '/m/07pw27b',
+            //         description: 'Atmospheric phenomenon',
+            //         score: 0.88611656,
+            //         topicality: 0.88611656
+            //     },
+            //     { mid: '/m/01d74z', description: 'Night', score: 0.88425183, topicality: 0.88425183 },
+            //     { mid: '/m/09ggk', description: 'Purple', score: 0.8638063, topicality: 0.8638063 },
+            //     { mid: '/m/01d9ll', description: 'Astronomical object', score: 0.85587794, topicality: 0.85587794 },
+            //     { mid: '/m/039b5', description: 'Galaxy', score: 0.8367594, topicality: 0.8367594 },
+            //     { mid: '/m/0d1n2', description: 'Horizon', score: 0.7861331, topicality: 0.7861331 },
+            //     { mid: '/m/06ngk', description: 'Star', score: 0.78378415, topicality: 0.78378415 },
+            //     { mid: '/m/06wqb', description: 'Space', score: 0.746108, topicality: 0.746108 }
+            // ])
+        });
     };
 
     const onClickGetGoogleVisionResults = () => {
@@ -86,7 +114,7 @@ const App = () => {
         const data = new FormData();
         data.append('file', searchImage);
         axios
-            .post(SERVER_URL, data, {})
+            .post(`${SERVER_URL}/upload`, data, {})
             .then(res => {
                 console.log('res', res);
 

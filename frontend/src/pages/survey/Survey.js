@@ -2,7 +2,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import 'react-loader-spinner/dist/loader/css/react-spinner-loader.css';
 import './Survey.css';
 
-import React, { createRef, useState, useEffect } from 'react';
+import React, { createRef, useEffect, useState } from 'react';
 import { animated, interpolate, useSpring, useSprings } from 'react-spring';
 import { toImageURL, toPercentage } from '../../utils/app-utils';
 
@@ -15,6 +15,7 @@ import NotificationSystem from 'react-notification-system';
 import { SERVER_URL } from '../../utils/consts';
 import axios from 'axios';
 import { firestore as db } from '../../config/firebase';
+
 const to = i => ({ x: 0, y: i * -4, scale: 1, rot: -10 + Math.random() * 20, delay: i * 100 });
 const from = i => ({ x: 0, y: -1000, scale: 1.5, rot: 0 });
 // This is being used down there in the view, it interpolates rotation and scale into a css transform
@@ -73,95 +74,76 @@ const Survey = () => {
             tfIdf: null,
             doc2vec: null
         });
-        return (
-            axios
-                // .get(`${SERVER_URL}/random`)
-                .post(`${SERVER_URL}/query-annotations`, [
-                    { mid: '/m/01bqvp', description: 'Sky', score: 0.9874151, topicality: 0.9874151 },
-                    { mid: '/m/01ctsf', description: 'Atmosphere', score: 0.8894614, topicality: 0.8894614 },
-                    {
-                        mid: '/m/07pw27b',
-                        description: 'Atmospheric phenomenon',
-                        score: 0.88611656,
-                        topicality: 0.88611656
-                    },
-                    { mid: '/m/01d74z', description: 'Night', score: 0.88425183, topicality: 0.88425183 },
-                    { mid: '/m/09ggk', description: 'Purple', score: 0.8638063, topicality: 0.8638063 },
-                    { mid: '/m/01d9ll', description: 'Astronomical object', score: 0.85587794, topicality: 0.85587794 },
-                    { mid: '/m/039b5', description: 'Galaxy', score: 0.8367594, topicality: 0.8367594 },
-                    { mid: '/m/0d1n2', description: 'Horizon', score: 0.7861331, topicality: 0.7861331 },
-                    { mid: '/m/06ngk', description: 'Star', score: 0.78378415, topicality: 0.78378415 },
-                    { mid: '/m/06wqb', description: 'Space', score: 0.746108, topicality: 0.746108 }
-                ])
-                .then(res => {
-                    console.log('res', res);
-                    const { searchedImage, tfIdf, doc2vec } = res.data;
-                    const tfIdfResults = tfIdf.body.hits.hits;
-                    const doc2vecResults = doc2vec.body.hits.hits;
-                    const sortedResults = tfIdfResults
-                        .map(result => ({
-                            algorithm: 'tfIdf',
+        return axios
+            .get(`${SERVER_URL}/random`)
+            .then(res => {
+                console.log('res', res);
+                const { searchedImage, tfIdf, doc2vec } = res.data;
+                const tfIdfResults = tfIdf.body.hits.hits;
+                const doc2vecResults = doc2vec.body.hits.hits;
+                const sortedResults = tfIdfResults
+                    .map(result => ({
+                        algorithm: 'tfIdf',
+                        userRating: {
+                            ratings: { objects: 5, background: 5, scenario: 5 },
+                            similarityScore: toPercentage(result._score)
+                        },
+                        result
+                    }))
+                    .concat(
+                        doc2vecResults.map(result => ({
+                            algorithm: 'doc2vec',
                             userRating: {
                                 ratings: { objects: 5, background: 5, scenario: 5 },
                                 similarityScore: toPercentage(result._score)
                             },
                             result
                         }))
-                        .concat(
-                            doc2vecResults.map(result => ({
-                                algorithm: 'doc2vec',
-                                userRating: {
-                                    ratings: { objects: 5, background: 5, scenario: 5 },
-                                    similarityScore: toPercentage(result._score)
-                                },
-                                result
-                            }))
-                        )
-                        .sort((res1, res2) => (res1.result._score < res2.result._score ? 1 : -1));
-                    const uniqueImages = new Set([]);
-                    const uniqueResults = [];
-                    sortedResults.forEach(res => {
-                        const { image_path } = res.result._source;
-                        if (!uniqueImages.has(image_path)) {
-                            uniqueResults.push(res);
-                            uniqueImages.add(image_path);
-                        }
-                    });
-
-                    setResults(sortedResults);
-                    setUniqueResults(uniqueResults);
-                    setResultIndex(0);
-
-                    console.log('results', sortedResults);
-                    setQueryTime({
-                        tfIdf: tfIdf.body.took,
-                        doc2vec: doc2vec.body.took
-                    });
-                    console.log('searchedImage', searchedImage);
-                    setSearchImage(searchedImage.body.hits.hits[0]._source);
-
-                    if (sortedResults.length > 0) {
-                        setError(false);
-                        setImageDescriptions(
-                            searchedImage.body.hits.hits[0]._source.labelAnnotations
-                                .map(annotation => {
-                                    return annotation.description;
-                                })
-                                .join(', ')
-                        );
+                    )
+                    .sort((res1, res2) => (res1.result._score < res2.result._score ? 1 : -1));
+                const uniqueImages = new Set([]);
+                const uniqueResults = [];
+                sortedResults.forEach(res => {
+                    const { image_path } = res.result._source;
+                    if (!uniqueImages.has(image_path)) {
+                        uniqueResults.push(res);
+                        uniqueImages.add(image_path);
                     }
-                    setLoading(false);
-                    // if (genSpinnerDone) {
-                    //     console.log('took awhile');
-                    //     setSearchSpinnerDone(false);
-                    //     setTimeout(() => setSearchSpinnerDone(true), 2500);
-                    // }
-                })
-                .catch(e => {
-                    console.error(e);
-                    setLoading(false);
-                })
-        );
+                });
+
+                setResults(sortedResults);
+                setUniqueResults(uniqueResults);
+                setResultIndex(0);
+
+                console.log('results', sortedResults);
+                setQueryTime({
+                    tfIdf: tfIdf.body.took,
+                    doc2vec: doc2vec.body.took
+                });
+                console.log('searchedImage', searchedImage);
+                setSearchImage(searchedImage.body.hits.hits[0]._source);
+
+                if (sortedResults.length > 0) {
+                    setError(false);
+                    setImageDescriptions(
+                        searchedImage.body.hits.hits[0]._source.labelAnnotations
+                            .map(annotation => {
+                                return annotation.description;
+                            })
+                            .join(', ')
+                    );
+                }
+                setLoading(false);
+                // if (genSpinnerDone) {
+                //     console.log('took awhile');
+                //     setSearchSpinnerDone(false);
+                //     setTimeout(() => setSearchSpinnerDone(true), 2500);
+                // }
+            })
+            .catch(e => {
+                console.error(e);
+                setLoading(false);
+            });
     };
 
     const addVoteToFirebase = () => {

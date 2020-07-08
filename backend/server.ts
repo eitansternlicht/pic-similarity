@@ -52,13 +52,12 @@ App.post('/query-annotations', (req, response) => {
         })
     ]).then(([doc2vecVectorResults, tfIdfVector]) => {
         const doc2vecVector = doc2vecVectorResults.data;
+        console.log('{ tfIdfVector, doc2vecVector }', { tfIdfVector, doc2vecVector });
         queryElasticByVectors({ tfIdfVector, doc2vecVector }).then(res => {
             response.json(res);
         });
     });
 });
-
-// labelAnnotationsToTerms
 
 App.listen(PORT, () => {
     console.log(`Pic Similarity Serive listening on PORT ${PORT}!`);
