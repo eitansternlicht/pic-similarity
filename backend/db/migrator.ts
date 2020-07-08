@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync } from 'fs';
+import { readFileSync, readdir, writeFileSync } from 'fs';
 
 import { frequencies } from '../utils/func-utils';
 import path from 'path';
@@ -294,12 +294,11 @@ const flip = obj => Object.fromEntries(Object.entries(obj).map(([k, v]) => [v, k
 // );
 // writeFileSync('image_paths.txt', image_paths.join('\n'));
 
-export const addDocVectorsToData = (docVectorsFilename: string, dataDocsFilename: string, outputFilename: string) => {
-    const docsVectors = JSON.parse(readFileSync(docVectorsFilename).toString());
-    const dataDocs: DataDoc[] = readJSON(dataDocsFilename);
+export const addDocVectorsToData = () => {
+    const docsVectors = JSON.parse(readFileSync(__dirname + '/../../db/doc2vec/doc-vectors.json').toString());
+    const dataDocs: DataDoc[] = readJSON(__dirname + '/../../db/docs.esdata');
     addDocVectors(dataDocs, docsVectors);
-    // const idToTerm = addTfIdfVector(dataDocs);
-    writeJSON(dataDocs, outputFilename);
+    writeJSON(dataDocs, __dirname + '/../../db/docs.esdata');
 };
 
 // console.log('dataDocs[0]', dataDocs[0]);

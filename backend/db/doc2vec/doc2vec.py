@@ -60,16 +60,14 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
 
 
 if __name__ == "__main__":
-    if os.path.exists("model"):
-        model = Doc2Vec.load("model")
-    else:
-        tagged_docs = read_corpus(DOCS_TOKENS_FILE)
-        model = train(tagged_docs)
-        model.delete_temporary_training_data(
-            keep_doctags_vectors=True, keep_inference=True
-        )
-        model.save("model")
-        write_doc_vectors(model, "doc-vectors.json")
+    model = Doc2Vec.load("model")
+    # tagged_docs = read_corpus(DOCS_TOKENS_FILE)
+    # model = train(tagged_docs)
+    # model.delete_temporary_training_data(
+    #     keep_doctags_vectors=True, keep_inference=True
+    # )
+    # model.save("model")
+    # write_doc_vectors(model, "doc-vectors.json")
 
     httpd = HTTPServer(('localhost', 8000), SimpleHTTPRequestHandler)
     print('started web server')
