@@ -20,6 +20,8 @@ const App = () => {
     const [imageDescriptions, setImageDescriptions] = useState('');
     const [results, setResults] = useState({ tfIdf: [], doc2vec: [] });
     const [searchImage, setSearchImage] = useState(undefined);
+    const [displaySearchedImage, setDisplaySearchedImage] = useState(undefined);
+
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(false);
     const [clearScreen, setClearScreen] = useState(false);
@@ -31,6 +33,7 @@ const App = () => {
 
     const onChangeFilePicker = event => {
         setSearchImage(event.target.files[0]);
+        setDisplaySearchedImage(URL.createObjectURL(event.target.files[0]));
     };
 
     function uploadFiles(event) {
@@ -186,6 +189,7 @@ const App = () => {
 
             {!error && !loading && results.tfIdf.length > 0 && results.doc2vec.length > 0 && !clearScreen ? (
                 <Container fluid>
+                    <img src={displaySearchedImage} />
                     {imageDescriptions && !clearScreen ? (
                         <Card style={{ width: '18rem' }}>
                             <Card.Img variant="top" src={toImageURL(results.searchedImage._source.image_path)} />
