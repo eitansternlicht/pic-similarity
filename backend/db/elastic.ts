@@ -70,3 +70,12 @@ export const queryElastic = async (searchImage: string) => {
         doc2vec: removedSearchedImage(searchImage, doc2vecResults)
     };
 };
+
+export const queryElasticByVectors = async ({ tfIdf_vector, doc2vec_vector }) => {
+    const tfIdfResults = await querySimilarity('cosineSimilaritySparse', 'tfIdf_vector', 5, tfIdf_vector);
+    const doc2vecResults = await querySimilarity('cosineSimilarity', 'doc2vec_vector', 5, doc2vec_vector);
+    return {
+        tfIdf: tfIdfResults,
+        doc2vec: doc2vecResults
+    };
+};

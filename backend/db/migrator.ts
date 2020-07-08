@@ -292,6 +292,9 @@ export const createDocTokensFile = (docsFile: string, outputDocTokensFile: strin
     const doc2vecInputFile: string = docsTokens.map(docTokens => docTokens.flatMap(toTerms).join(' ')).join('\n');
     writeFileSync(outputDocTokensFile, doc2vecInputFile);
 };
+
+export const labelAnnotationsToTerms = (labelAnnotations: {description: string}[]) => 
+    labelAnnotations.flatMap(({description}) => toTerms(description))
 // console.log(docsVectors);
 
 // classifyImage(imagePath).then(predictions => {
