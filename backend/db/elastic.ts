@@ -31,7 +31,6 @@ const querySimilarity = (
             }
         }
     };
-    console.log('queryBody', JSON.stringify(queryBody, null, '\t'));
     return client.search(queryBody);
 };
 

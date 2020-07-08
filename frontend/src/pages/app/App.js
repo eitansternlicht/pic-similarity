@@ -76,7 +76,11 @@ const App = () => {
                     queryResults => {
                         console.log('queryResults', queryResults);
                         if (queryResults && queryResults.data) {
-                            setResults(queryResults.data);
+                            setResults({
+                                tfIdf: queryResults.data.tfIdf.body.hits.hits,
+                                doc2vec: queryResults.data.doc2vec.body.hits.hits
+                            });
+                            setError(false);
                         }
                     },
                     errpr => console.log('errr', errpr)
