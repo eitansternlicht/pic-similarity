@@ -68,13 +68,13 @@ const SurveyResults = () => {
                                 <Spring
                                     config={{ friction: 100, precision: 1 }}
                                     from={{ number: 1 }}
-                                    to={{ number: scores.length }}
+                                    to={{ number: scores.length * 10 }}
                                 >
                                     {props => <h1 style={{ fontSize: '2em' }}>{Math.floor(props.number)}</h1>}
                                 </Spring>
                             </div>
                         }{' '}
-                        Number of surveys
+                        Number of Images
                     </h3>
 
                     <h3 style={{ fontSize: '2em' }}>
