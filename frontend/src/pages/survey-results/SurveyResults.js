@@ -154,10 +154,11 @@ const SurveyResults = () => {
                             justifyContent: 'center'
                         }}
                     >
-                        INTRODUCTION
+                        Average between Similarity Score and Google Vision Confidence vs User Rating
                     </h1>
                 </Fade>
                 <Fade bottom>
+                <div>
                     <h1
                         style={{
                             color: '#E6E8EF',
@@ -173,12 +174,14 @@ const SurveyResults = () => {
                             justifyContent: 'center'
                         }}
                     >
-                        Harvard University President Larry Bacow said in a statement Monday evening that "we are deeply
-                        concerned that the guidance issued today by US Immigration and Customs Enforcement imposes a
-                        blunt, one-size-fits-all approach to a complex problem giving international students,
-                        particularly those in online programs, few options beyond leaving the country or transferring
-                        schools.
+                        In this graph we're averaging the:
                     </h1>
+                    <ol>
+                        <li style={{textAlign: 'left'}}>Google Vision confidence of the searched image</li>
+                        <li style={{textAlign: 'left'}}>Google Vision confidence of the result image</li>
+                        <li style={{textAlign: 'left'}}>Similarity score that the similarity algorithm (TF-IDF, Doc2Vec) returned</li>
+                    </ol>
+                    </div>
                 </Fade>
 
                 <Fade bottom>
@@ -198,7 +201,7 @@ const SurveyResults = () => {
                             withCombined
                             width={800}
                             height={650}
-                            title="First"
+                            title=""
                             scoreName="Similarity Score + Google Vision Confidence"
                         />
                     </div>
@@ -216,7 +219,7 @@ const SurveyResults = () => {
                             justifyContent: 'center'
                         }}
                     >
-                        INTRODUCTION
+                        Google Vision confidence vs User rating 
                     </h1>
                 </Fade>
                 <Fade bottom>
@@ -233,11 +236,7 @@ const SurveyResults = () => {
                             justifyContent: 'center'
                         }}
                     >
-                        Harvard University President Larry Bacow said in a statement Monday evening that "we are deeply
-                        concerned that the guidance issued today by US Immigration and Customs Enforcement imposes a
-                        blunt, one-size-fits-all approach to a complex problem giving international students,
-                        particularly those in online programs, few options beyond leaving the country or transferring
-                        schools.
+                        In this graph we're comparing how confident Google vision is about the descriptions it gave to the searched image and the result image (averaging the scores of all description) vs the rating the pair of images recieved by the user
                     </h1>
                 </Fade>
             </div>
@@ -276,7 +275,7 @@ const SurveyResults = () => {
                             justifyContent: 'center'
                         }}
                     >
-                        INTRODUCTION
+                        Ratings split by rating type (Objects, Background & Color, Scenario)
                     </h1>
                 </Fade>
                 <Fade bottom>
@@ -294,11 +293,8 @@ const SurveyResults = () => {
                             justifyContent: 'center'
                         }}
                     >
-                        Harvard University President Larry Bacow said in a statement Monday evening that "we are deeply
-                        concerned that the guidance issued today by US Immigration and Customs Enforcement imposes a
-                        blunt, one-size-fits-all approach to a complex problem giving international students,
-                        particularly those in online programs, few options beyond leaving the country or transferring
-                        schools.
+                        In this graph we're comparing how confident Google vision is about the descriptions it gave to the searched image and the result image (averaging the scores of all description) vs the rating the pair of images recieved by the user split by rating type (Objects, Background & Color, Scenario)
+                    
                     </h1>
                 </Fade>
 
@@ -332,7 +328,7 @@ const SurveyResults = () => {
                             justifyContent: 'center'
                         }}
                     >
-                        INTRODUCTION
+                        Bar Graphs (Split by buckets of similarity scores)
                     </h1>
                 </Fade>
                 <Fade bottom>
@@ -349,11 +345,7 @@ const SurveyResults = () => {
                             justifyContent: 'center'
                         }}
                     >
-                        Harvard University President Larry Bacow said in a statement Monday evening that "we are deeply
-                        concerned that the guidance issued today by US Immigration and Customs Enforcement imposes a
-                        blunt, one-size-fits-all approach to a complex problem giving international students,
-                        particularly those in online programs, few options beyond leaving the country or transferring
-                        schools.
+                        In this graph we grouped the similarity scores into buckets of 10 ranges, each bar shows the average user rating for all the results that were in that bucket
                     </h1>
                 </Fade>
             </div>
@@ -386,7 +378,7 @@ const SurveyResults = () => {
                             justifyContent: 'center'
                         }}
                     >
-                        INTRODUCTION
+                        Bar Graphs (Split by buckets of similarity scores) - Split by rating type
                     </h1>
                 </Fade>
                 <Fade bottom>
@@ -404,11 +396,8 @@ const SurveyResults = () => {
                             justifyContent: 'center'
                         }}
                     >
-                        Harvard University President Larry Bacow said in a statement Monday evening that "we are deeply
-                        concerned that the guidance issued today by US Immigration and Customs Enforcement imposes a
-                        blunt, one-size-fits-all approach to a complex problem giving international students,
-                        particularly those in online programs, few options beyond leaving the country or transferring
-                        schools.
+                        In this graph we grouped the similarity scores into buckets of 10 ranges, each bar shows the average user rating for all the results that were in that bucket and for a specific type of rating (Objects, Background & Color, Scenario)
+
                     </h1>
                 </Fade>
 
@@ -444,7 +433,7 @@ const SurveyResults = () => {
                             justifyContent: 'center'
                         }}
                     >
-                        INTRODUCTION
+                        User Rating vs Similarity Score - Scatter Plot
                     </h1>
                 </Fade>
                 <Fade bottom>
@@ -461,11 +450,7 @@ const SurveyResults = () => {
                             justifyContent: 'center'
                         }}
                     >
-                        Harvard University President Larry Bacow said in a statement Monday evening that "we are deeply
-                        concerned that the guidance issued today by US Immigration and Customs Enforcement imposes a
-                        blunt, one-size-fits-all approach to a complex problem giving international students,
-                        particularly those in online programs, few options beyond leaving the country or transferring
-                        schools.
+                        In this graph we plotted all the results into a scatter plot and calculated the "pearson correlation" of the relationship between the user rating and the similarity score of each algorithm
                     </h1>
                 </Fade>
 
@@ -506,7 +491,7 @@ const SurveyResults = () => {
                                 justifyContent: 'center'
                             }}
                         >
-                            INTRODUCTION
+                            User ratings for ranges of similarity scores (Dynamic)
                         </h1>
                     </Fade>
                     <Fade bottom>
@@ -524,11 +509,7 @@ const SurveyResults = () => {
                                 justifyContent: 'center'
                             }}
                         >
-                            Harvard University President Larry Bacow said in a statement Monday evening that "we are
-                            deeply concerned that the guidance issued today by US Immigration and Customs Enforcement
-                            imposes a blunt, one-size-fits-all approach to a complex problem giving international
-                            students, particularly those in online programs, few options beyond leaving the country or
-                            transferring schools.
+                            We broke down the distribution of rating number a user gave for an image with similarity scores in the range specified
                         </h1>
                     </Fade>
                 </div>
