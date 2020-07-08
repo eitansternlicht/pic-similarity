@@ -3,6 +3,7 @@ import './App.css';
 
 import React, { useState } from 'react';
 
+import { API } from '../../config/GoogleVision';
 import Button from 'react-bootstrap/Button';
 import Card from 'react-bootstrap/Card';
 import Container from 'react-bootstrap/Container';
@@ -12,7 +13,6 @@ import Spinner from 'react-bootstrap/Spinner';
 import { auth } from '../../config/firebase';
 import axios from 'axios';
 import { toImageURL } from '../../utils/app-utils';
-import { API } from '../../config/GoogleVision';
 
 const SERVER_URL = `http://localhost:${SERVER_PORT}/upload`;
 
@@ -122,17 +122,26 @@ const App = () => {
             });
     };
     const login = (
-        <div class="container" onclick="onclick">
-            <div class="top"></div>
-            <div class="bottom"></div>
-            <div class="center">
+        <div className="container">
+            <div className="top"></div>
+            <div className="bottom"></div>
+            <div className="center">
                 <h2>Please Sign In</h2>
-                <input type="email" placeholder="email" value={email} onInput={event => setEmail(event.target.value)} />
+                <input
+                    type="email"
+                    placeholder="email"
+                    value={email}
+                    onChange={event => {
+                        setEmail(event.target.value);
+                    }}
+                />
                 <input
                     type="password"
                     placeholder="password"
                     value={password}
-                    onInput={event => setPassword(event.target.value)}
+                    onChange={event => {
+                        setPassword(event.target.value);
+                    }}
                 />
                 <button
                     onClick={() => {

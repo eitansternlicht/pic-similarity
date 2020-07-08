@@ -1,6 +1,4 @@
 (function (exports) {
-    'use strict';
-
     var sort,
         round,
         min,
