@@ -9,6 +9,7 @@ import React from 'react';
 import { ScatterChart as ReactScatterChart } from '@toast-ui/react-chart';
 import { correlation } from '../../utils/pearson-correlation';
 import { uppercaseWord } from '../../utils/func-utils';
+import { Spring } from 'react-spring/renderprops';
 
 const toOptions = ({ ratingType, scoreName, title, width, height }) => ({
     chart: {
@@ -77,12 +78,43 @@ const ScatterChart = props => {
     const correlationData = data.series.map(({ name, data }) => [name, toCorrelation(data).toFixed(3)]);
     return (
         <div>
-            <ReactScatterChart data={data} options={toOptions(props)} />
-            {correlationData.map(([algorithm, correlationScore]) => (
-                <div key={algorithm}>
-                    {algorithm} Correlation: {correlationScore}
-                </div>
-            ))}
+            <div style={{ flexDirection: 'row', display: 'flex', justifyContent: 'space-evenly' }}>
+                <ReactScatterChart data={data} options={toOptions(props)} />
+            </div>
+            <div
+                style={{
+                    flexDirection: 'row',
+                    display: 'flex',
+                    justifyContent: 'space-evenly',
+                    paddingTop: 50
+                }}
+            >
+                {correlationData.map(([algorithm, correlationScore]) => (
+                    <div
+                        key={algorithm}
+                        style={{ alignItems: 'center', color: '#E6E8EF', paddingLeft: 30, paddingRight: 30 }}
+                    >
+                        <h3>
+                            <div
+                                style={{
+                                    flexDirection: 'row',
+                                    display: 'flex',
+                                    justifyContent: 'space-evenly'
+                                }}
+                            >
+                                <Spring
+                                    config={{ friction: 100, precision: 0.1 }}
+                                    from={{ number: -1 }}
+                                    to={{ number: correlationScore }}
+                                >
+                                    {props => <div>{props.number.toFixed(3)}</div>}
+                                </Spring>
+                            </div>
+                            {algorithm} Correlation
+                        </h3>
+                    </div>
+                ))}
+            </div>
         </div>
     );
 };

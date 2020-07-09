@@ -89,7 +89,7 @@ const SurveyResults = () => {
                                 }}
                             >
                                 <Spring
-                                    config={{ friction: 400, precision: 0.1 }}
+                                    config={{ friction: 100, precision: 0.1 }}
                                     from={{ number: 1 }}
                                     to={{
                                         number: average(
@@ -120,7 +120,7 @@ const SurveyResults = () => {
                                 }}
                             >
                                 <Spring
-                                    config={{ friction: 400, precision: 0.1 }}
+                                    config={{ friction: 100, precision: 0.1 }}
                                     from={{ number: 1 }}
                                     to={{
                                         number: average(
@@ -154,15 +154,13 @@ const SurveyResults = () => {
                             justifyContent: 'center'
                         }}
                     >
-                        Average between Similarity Score and Google Vision Confidence vs User Rating
+                        Google Vision confidence vs User rating
                     </h1>
                 </Fade>
                 <Fade bottom>
-                <div>
                     <h1
                         style={{
                             color: '#E6E8EF',
-
                             paddingLeft: 20,
                             paddingRight: 20,
                             fontSize: '1.5em',
@@ -174,13 +172,132 @@ const SurveyResults = () => {
                             justifyContent: 'center'
                         }}
                     >
-                        In this graph we're averaging the:
+                        In this graph we're comparing how confident Google vision is about the descriptions it gave to
+                        the searched image and the result image (averaging the scores of all description) vs the rating
+                        the pair of images recieved by the user
                     </h1>
-                    <ol>
-                        <li style={{textAlign: 'left'}}>Google Vision confidence of the searched image</li>
-                        <li style={{textAlign: 'left'}}>Google Vision confidence of the result image</li>
-                        <li style={{textAlign: 'left'}}>Similarity score that the similarity algorithm (TF-IDF, Doc2Vec) returned</li>
-                    </ol>
+                </Fade>
+
+                <Fade bottom>
+                    <div
+                        style={{
+                            paddingTop: 50,
+                            paddingBottom: 100,
+                            display: 'flex',
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                        }}
+                    >
+                        <ScatterChart
+                            docs={scores}
+                            width={800}
+                            height={650}
+                            title="Second"
+                            scoreName="Google Vision Confidence"
+                        />
+                    </div>
+                </Fade>
+            </div>
+
+            <div style={{}}>
+                <Fade bottom>
+                    <h1
+                        style={{
+                            fontSize: '2em',
+                            paddingTop: 50,
+                            display: 'flex',
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                        }}
+                    >
+                        Ratings split by rating type (Objects, Background & Color, Scenario)
+                    </h1>
+                </Fade>
+                <Fade bottom>
+                    <h1
+                        style={{
+                            paddingLeft: 20,
+                            paddingRight: 20,
+                            fontSize: '1.5em',
+                            paddingTop: 15,
+                            display: 'flex',
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            textAlign: 'center',
+                            justifyContent: 'center'
+                        }}
+                    >
+                        In this graph we're comparing how confident Google vision is about the descriptions it gave to
+                        the searched image and the result image (averaging the scores of all description) vs the rating
+                        the pair of images recieved by the user split by rating type (Objects, Background & Color,
+                        Scenario)
+                    </h1>
+                </Fade>
+
+                <Fade bottom>
+                    <div
+                        style={{
+                            display: 'flex',
+                            flexDirection: 'row',
+                            margin: '20px 0',
+                            justifyContent: 'space-evenly',
+                            paddingTop: 50,
+                            paddingBottom: 100
+                        }}
+                    >
+                        <ScatterChart docs={scores} ratingType="objects" scoreName="Google Vision Confidence" />
+                        <ScatterChart docs={scores} ratingType="background" scoreName="Google Vision Confidence" />
+                        <ScatterChart docs={scores} ratingType="scenario" scoreName="Google Vision Confidence" />
+                    </div>
+                </Fade>
+            </div>
+
+            <div style={{ backgroundColor: '#8797AF' }}>
+                <Fade bottom>
+                    <h1
+                        style={{
+                            color: '#E6E8EF',
+                            fontSize: '2em',
+                            paddingTop: 50,
+                            display: 'flex',
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                        }}
+                    >
+                        Average between Similarity Score and Google Vision Confidence vs User Rating
+                    </h1>
+                </Fade>
+                <Fade bottom>
+                    <div>
+                        <h1
+                            style={{
+                                color: '#E6E8EF',
+                                paddingLeft: 20,
+                                paddingRight: 20,
+                                fontSize: '1.5em',
+                                paddingTop: 15,
+                                display: 'flex',
+                                flexDirection: 'row',
+                                alignItems: 'center',
+                                textAlign: 'center',
+                                justifyContent: 'center'
+                            }}
+                        >
+                            In this graph we're averaging the:
+                        </h1>
+
+                        <h1 style={{ textAlign: 'center', fontSize: '1.5em', color: '#E6E8EF' }}>
+                            1. Google Vision confidence of the searched image
+                        </h1>
+                        <h1 style={{ textAlign: 'center', fontSize: '1.5em', color: '#E6E8EF' }}>
+                            2. Google Vision confidence of the result image
+                        </h1>
+                        <h1 style={{ textAlign: 'center', fontSize: '1.5em', color: '#E6E8EF' }}>
+                            3. Similarity score that the similarity algorithm (TF-IDF, Doc2Vec) returned
+                        </h1>
                     </div>
                 </Fade>
 
@@ -204,114 +321,6 @@ const SurveyResults = () => {
                             title=""
                             scoreName="Similarity Score + Google Vision Confidence"
                         />
-                    </div>
-                </Fade>
-            </div>
-            <div style={{}}>
-                <Fade bottom>
-                    <h1
-                        style={{
-                            fontSize: '2em',
-                            paddingTop: 50,
-                            display: 'flex',
-                            flexDirection: 'row',
-                            alignItems: 'center',
-                            justifyContent: 'center'
-                        }}
-                    >
-                        Google Vision confidence vs User rating 
-                    </h1>
-                </Fade>
-                <Fade bottom>
-                    <h1
-                        style={{
-                            paddingLeft: 20,
-                            paddingRight: 20,
-                            fontSize: '1.5em',
-                            paddingTop: 15,
-                            display: 'flex',
-                            flexDirection: 'row',
-                            alignItems: 'center',
-                            textAlign: 'center',
-                            justifyContent: 'center'
-                        }}
-                    >
-                        In this graph we're comparing how confident Google vision is about the descriptions it gave to the searched image and the result image (averaging the scores of all description) vs the rating the pair of images recieved by the user
-                    </h1>
-                </Fade>
-            </div>
-
-            <Fade bottom>
-                <div
-                    style={{
-                        paddingTop: 50,
-                        paddingBottom: 100,
-                        display: 'flex',
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        justifyContent: 'center'
-                    }}
-                >
-                    <ScatterChart
-                        docs={scores}
-                        width={800}
-                        height={650}
-                        title="Second"
-                        scoreName="Google Vision Confidence"
-                    />
-                </div>
-            </Fade>
-
-            <div style={{ backgroundColor: '#8797AF' }}>
-                <Fade bottom>
-                    <h1
-                        style={{
-                            color: '#E6E8EF',
-                            fontSize: '2em',
-                            paddingTop: 50,
-                            display: 'flex',
-                            flexDirection: 'row',
-                            alignItems: 'center',
-                            justifyContent: 'center'
-                        }}
-                    >
-                        Ratings split by rating type (Objects, Background & Color, Scenario)
-                    </h1>
-                </Fade>
-                <Fade bottom>
-                    <h1
-                        style={{
-                            color: '#E6E8EF',
-                            paddingLeft: 20,
-                            paddingRight: 20,
-                            fontSize: '1.5em',
-                            paddingTop: 15,
-                            display: 'flex',
-                            flexDirection: 'row',
-                            alignItems: 'center',
-                            textAlign: 'center',
-                            justifyContent: 'center'
-                        }}
-                    >
-                        In this graph we're comparing how confident Google vision is about the descriptions it gave to the searched image and the result image (averaging the scores of all description) vs the rating the pair of images recieved by the user split by rating type (Objects, Background & Color, Scenario)
-                    
-                    </h1>
-                </Fade>
-
-                <Fade bottom>
-                    <div
-                        style={{
-                            display: 'flex',
-                            flexDirection: 'row',
-                            margin: '20px 0',
-                            justifyContent: 'space-evenly',
-                            paddingTop: 50,
-                            paddingBottom: 100
-                        }}
-                    >
-                        <ScatterChart docs={scores} ratingType="objects" scoreName="Google Vision Confidence" />
-                        <ScatterChart docs={scores} ratingType="background" scoreName="Google Vision Confidence" />
-                        <ScatterChart docs={scores} ratingType="scenario" scoreName="Google Vision Confidence" />
                     </div>
                 </Fade>
             </div>
@@ -345,7 +354,8 @@ const SurveyResults = () => {
                             justifyContent: 'center'
                         }}
                     >
-                        In this graph we grouped the similarity scores into buckets of 10 ranges, each bar shows the average user rating for all the results that were in that bucket
+                        In this graph we grouped the similarity scores into buckets of 10 ranges, each bar shows the
+                        average user rating for all the results that were in that bucket
                     </h1>
                 </Fade>
             </div>
@@ -396,8 +406,9 @@ const SurveyResults = () => {
                             justifyContent: 'center'
                         }}
                     >
-                        In this graph we grouped the similarity scores into buckets of 10 ranges, each bar shows the average user rating for all the results that were in that bucket and for a specific type of rating (Objects, Background & Color, Scenario)
-
+                        In this graph we grouped the similarity scores into buckets of 10 ranges, each bar shows the
+                        average user rating for all the results that were in that bucket and for a specific type of
+                        rating (Objects, Background & Color, Scenario)
                     </h1>
                 </Fade>
 
@@ -450,7 +461,9 @@ const SurveyResults = () => {
                             justifyContent: 'center'
                         }}
                     >
-                        In this graph we plotted all the results into a scatter plot and calculated the "pearson correlation" of the relationship between the user rating and the similarity score of each algorithm
+                        In this graph we plotted all the results into a scatter plot and calculated the "pearson
+                        correlation" of the relationship between the user rating and the similarity score of each
+                        algorithm
                     </h1>
                 </Fade>
 
@@ -509,7 +522,8 @@ const SurveyResults = () => {
                                 justifyContent: 'center'
                             }}
                         >
-                            We broke down the distribution of rating number a user gave for an image with similarity scores in the range specified
+                            We broke down the distribution of rating number a user gave for an image with similarity
+                            scores in the range specified
                         </h1>
                     </Fade>
                 </div>

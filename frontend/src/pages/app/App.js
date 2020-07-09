@@ -13,6 +13,13 @@ import Spinner from 'react-bootstrap/Spinner';
 import { auth } from '../../config/firebase';
 import axios from 'axios';
 import { toImageURL } from '../../utils/app-utils';
+import ReactHoverObserver from 'react-hover-observer';
+
+const ImageHoverDisplayer = ({ isHovering = false, imgSrc }) => (
+    <div style={{ width: 400, height: 500 }}>
+        Is Hovering: {isHovering ? 'image has no disc' : <img src={imgSrc} />}
+    </div>
+);
 
 const App = () => {
     const [imageDescriptions, setImageDescriptions] = useState('');
@@ -28,6 +35,7 @@ const App = () => {
     const [password, setPassword] = useState('');
     const [loginError, setLoginError] = useState(null);
     const [loggedIn, setLoggedIn] = useState(false);
+    const [hover, setHover] = useState(false);
 
     const onChangeFilePicker = event => {
         setSearchImage(event.target.files[0]);
@@ -177,14 +185,17 @@ const App = () => {
                 />
                 <button
                     onClick={() => {
+                        console.log('here');
                         auth.signInWithEmailAndPassword(email, password).then(
                             _ => {
+                                console.log('logged in', error);
                                 setLoggedIn(true);
                                 setLoginError(null);
                                 setEmail('');
                                 setPassword('');
                             },
                             error => {
+                                console.log('err', error);
                                 setLoginError(error.toString());
                             }
                         );
@@ -230,7 +241,13 @@ const App = () => {
 
             {!error && !loading && results.tfIdf.length > 0 && results.doc2vec.length > 0 && !clearScreen ? (
                 <Container fluid>
-                    <img src={displaySearchedImage} />
+                    {/* <ReactHoverObserver>
+                        <ImageHoverDisplayer imgSrc={displaySearchedImage} />
+                    </ReactHoverObserver> */}
+
+                    <div>
+                        <img src={displaySearchedImage} />
+                    </div>
                     {imageDescriptions && !clearScreen ? (
                         <Card style={{ width: '18rem' }}>
                             <Card.Img variant="top" src={toImageURL(results.searchedImage._source.image_path)} />
