@@ -185,7 +185,6 @@ const App = () => {
                 />
                 <button
                     onClick={() => {
-                        console.log('here');
                         auth.signInWithEmailAndPassword(email, password).then(
                             _ => {
                                 console.log('logged in', error);

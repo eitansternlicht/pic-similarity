@@ -5,14 +5,8 @@ const client = new Client({
     node: 'http://localhost:9200/'
 });
 
-const querySimilarity = (
-    elasticSimilarityFunction: string,
-    elasticDocVectorFieldName: string,
-    size: number,
-    queryVector: any
-) => {
-    const source = `${elasticSimilarityFunction}(params.queryVector, doc['${elasticDocVectorFieldName}']) + 1.0`;
-    const queryBody = {
+const querySimilarity = (elasticSimilarityFunction: string, elasticDocVectorFieldName: string, size: number, queryVector: any) => 
+    client.search({
         index: ELASTIC_DB_NAME,
         size,
         body: {
@@ -21,7 +15,7 @@ const querySimilarity = (
                     query: { match_all: {} },
                     script_score: {
                         script: {
-                            source,
+                            `${elasticSimilarityFunction}(params.queryVector, doc['${elasticDocVectorFieldName}']) + 1.0`;,
                             params: {
                                 queryVector
                             }
@@ -30,9 +24,8 @@ const querySimilarity = (
                 }
             }
         }
-    };
-    return client.search(queryBody);
-};
+    });
+
 
 const queryExact = (imageFilename: string) =>
     client.search({

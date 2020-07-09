@@ -7,6 +7,8 @@ from io import BytesIO
 from gensim.models.doc2vec import TaggedDocument, Doc2Vec
 from gensim.utils import simple_preprocess
 from gensim.test.utils import get_tmpfile
+import time
+
 
 DOCS_TOKENS_FILE = 'doc-tokens.txt'
 model = None
@@ -41,12 +43,8 @@ class NumpyArrayEncoder(JSONEncoder):
 
 
 class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
-    def do_GET(self):
-        self.send_response(200)
-        self.end_headers()
-        self.wfile.write(b'Hello, world!')
-
     def do_POST(self):
+        start = time.time()
         content_length = int(self.headers['Content-Length'])
         body = self.rfile.read(content_length)
         labelAnnotations = json.loads(body)
@@ -56,6 +54,8 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
         self.end_headers()
         response = BytesIO()
         response.write(str.encode(json.dumps(vec, cls=NumpyArrayEncoder)))
+        end = time.time()
+        print("query time: {}".format(end - start))
         self.wfile.write(response.getvalue())
 
 
