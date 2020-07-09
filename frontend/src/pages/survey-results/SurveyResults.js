@@ -423,7 +423,7 @@ const SurveyResults = () => {
                             paddingBottom: 100
                         }}
                     >
-                        <ChartAverageRating docs={scores} ratingType="objects" />
+                        <ChartAverageRating docs={scores} ratingType={"objects"} />
 
                         <ChartAverageRating docs={scores} ratingType="background" />
 
