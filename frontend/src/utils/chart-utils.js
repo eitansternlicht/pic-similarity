@@ -19,11 +19,9 @@ export const similarityToUserRatings = (similarityAlgorithm, docs, ratingType) =
                 y: average(Object.values(ratings)),
                 x: similarityScore
             };
-            console.log('flaa', ratings);
             return r;
         })
     );
-    console.log('blaa', res);
     return res;
     const results = {};
     for (const doc of docs) {
@@ -99,9 +97,7 @@ export const docToCombinedSimilarity = ratingType => doc => {
     return Object.values(resultsMap).map(({ tfIdf, doc2vec }) => ({
         x: (
             average([
-                average(tfIdf.labelAnnotations.map(a => a.score)),
-                average(doc2vec.labelAnnotations.map(a => a.score)),
-                searchedImageConf,
+                average([average(doc2vec.labelAnnotations.map(a => a.score)), searchedImageConf]),
                 tfIdf.userRating.similarityScore / 100,
                 doc2vec.userRating.similarityScore / 100
             ]) * 100

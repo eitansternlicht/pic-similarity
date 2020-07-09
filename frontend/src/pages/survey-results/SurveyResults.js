@@ -193,7 +193,6 @@ const SurveyResults = () => {
                             docs={scores}
                             width={800}
                             height={650}
-                            title="Second"
                             scoreName="Google Vision Confidence"
                         />
                     </div>
@@ -484,7 +483,6 @@ const SurveyResults = () => {
                             withCombined
                             width={800}
                             height={650}
-                            title="First"
                             scoreName="Similarity Score"
                         />
                     </div>
