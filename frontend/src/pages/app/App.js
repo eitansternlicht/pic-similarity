@@ -14,7 +14,7 @@ import { auth } from '../../config/firebase';
 import axios from 'axios';
 import { toImageURL } from '../../utils/app-utils';
 import ReactHoverObserver from 'react-hover-observer';
-
+import { average } from '../../utils/func-utils';
 const ImageHoverDisplayer = ({ isHovering = false, imgSrc }) => (
     <div style={{ width: 400, height: 500 }}>
         Is Hovering: {isHovering ? 'image has no disc' : <img src={imgSrc} />}
@@ -26,7 +26,7 @@ const App = () => {
     const [results, setResults] = useState({ tfIdf: [], doc2vec: [] });
     const [searchImage, setSearchImage] = useState(undefined);
     const [displaySearchedImage, setDisplaySearchedImage] = useState(undefined);
-
+    const [searchImageLabelAnnotions, setSearchImageLabelAnnotions] = useState(undefined);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(false);
     const [clearScreen, setClearScreen] = useState(false);
@@ -36,7 +36,39 @@ const App = () => {
     const [loginError, setLoginError] = useState(null);
     const [loggedIn, setLoggedIn] = useState(false);
     const [hover, setHover] = useState(false);
+    const [disImage, setDisImage] = useState(undefined);
 
+    const showSearchedImage = () => {
+        if (searchImageLabelAnnotions != undefined) {
+            return (
+                <div
+                    className="raleway"
+                    style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexDirection: 'column',
+                        marginTop: 50
+                    }}
+                >
+                    <div>
+                        <h1 style={{ fontSize: '3em' }}>Searched Image</h1>
+                    </div>
+                    <img style={{ width: '25rem' }} src={displaySearchedImage} />
+
+                    <div>
+                        <div style={{ marginTop: 20, fontSize: '1.3em' }}>
+                            Descriptions: {searchImageLabelAnnotions.map(({ description }) => description).join(', ')}
+                        </div>
+                        <div style={{ fontSize: '1.3em' }}>
+                            Average Google Confidence score:{' '}
+                            {average(searchImageLabelAnnotions.map(({ score }) => score)).toFixed(3)}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+    };
     const onChangeFilePicker = event => {
         setSearchImage(event.target.files[0]);
         setDisplaySearchedImage(URL.createObjectURL(event.target.files[0]));
@@ -80,6 +112,7 @@ const App = () => {
             if (res) {
                 const { labelAnnotations } = res.data.responses[0];
                 console.log('Google vision results', labelAnnotations);
+                setSearchImageLabelAnnotions(labelAnnotations);
                 axios.post(`${SERVER_URL}/query-annotations`, labelAnnotations).then(
                     queryResults => {
                         console.log('queryResults', queryResults);
@@ -113,10 +146,6 @@ const App = () => {
             //     { mid: '/m/06wqb', description: 'Space', score: 0.746108, topicality: 0.746108 }
             // ])
         });
-    };
-
-    const onClickGetGoogleVisionResults = () => {
-        alert("i'm here");
     };
 
     const onClickGetSimilar = () => {
@@ -209,45 +238,89 @@ const App = () => {
     );
     const mainApp = (
         <Container fluid>
-            <h1>Pic Similarity Service</h1>
-            <h2>Upload Image</h2>
-            <input
-                type="file"
-                accept="image/*"
-                name="file"
-                onChange={onChangeFilePicker}
-                ref={ref => setImageInputRef(ref)}
-            />
-            <Button
-                varient="primary"
-                onClick={onClickGetSimilar}
-                type="submit"
-                disabled={!searchImage}
-                style={{ marginRight: 10 }}
+            <div
+                style={{
+                    display: 'flex',
+                    alignItems: 'left',
+                    flexDirection: 'colunm',
+                    justifyContent: 'space-evenly',
+                    marginTop: 50
+                }}
             >
-                Get Similar
-            </Button>
+                <div
+                    className="raleway"
+                    style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexDirection: 'column'
+                    }}
+                >
+                    <div
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            flexDirection: 'column'
+                        }}
+                    >
+                        <h1>Pic Similarity Service</h1>
+                        <h2>Upload Image</h2>
+                    </div>
 
-            <Button
-                varient="primary"
-                onClick={uploadFiles}
-                type="submit"
-                disabled={!searchImage}
-                style={{ marginRight: 10 }}
-            >
-                Google cloud vision
-            </Button>
+                    <div
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            flexDirection: 'column',
+                            paddingTop: 20
+                        }}
+                    >
+                        <input
+                            type="file"
+                            accept="image/*"
+                            name="file"
+                            onChange={onChangeFilePicker}
+                            ref={ref => setImageInputRef(ref)}
+                        />
+                    </div>
+                    <div
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            flexDirection: 'row',
+                            paddingTop: 20
+                        }}
+                    >
+                        {/* <Button
+                        varient="primary"
+                        onClick={onClickGetSimilar}
+                        type="submit"
+                        disabled={!searchImage}
+                        style={{ marginRight: 10 }}
+                    >
+                        Get Similar
+                    </Button> */}
+
+                        <Button
+                            varient="primary"
+                            onClick={uploadFiles}
+                            type="submit"
+                            disabled={!searchImage}
+                            style={{ padding: 10, paddingRight: 100, paddingLeft: 100 }}
+                        >
+                            Search
+                        </Button>
+                    </div>
+                </div>
+                {showSearchedImage()}
+            </div>
             {loading ? <Spinner animation="border" /> : null}
 
             {!error && !loading && results.tfIdf.length > 0 && results.doc2vec.length > 0 && !clearScreen ? (
                 <Container fluid>
-                    {/* <ReactHoverObserver>
-                        <ImageHoverDisplayer imgSrc={displaySearchedImage} />
-                    </ReactHoverObserver> */}
-
-                    <div>
-                        <img src={displaySearchedImage} />
-                    </div>
                     {imageDescriptions && !clearScreen ? (
                         <Card style={{ width: '18rem' }}>
                             <Card.Img variant="top" src={toImageURL(results.searchedImage._source.image_path)} />
@@ -257,8 +330,29 @@ const App = () => {
                             </Card.Body>
                         </Card>
                     ) : null}
-                    <h4>tfIdf results</h4>
-                    <Row>
+                    <div
+                        className="raleway"
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            flexDirection: 'column',
+                            marginTop: 50,
+                            marginBottom: 30
+                        }}
+                    >
+                        <h1 style={{ fontSize: '3em' }}>TF-IDF Results</h1>
+                    </div>
+
+                    <div
+                        className="raleway"
+                        style={{
+                            display: 'flex',
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            justifyContent: 'space-evenly'
+                        }}
+                    >
                         {results.tfIdf.map(hit => {
                             const { image_path, labelAnnotations } = hit._source;
 
@@ -278,10 +372,29 @@ const App = () => {
                                 </Card>
                             );
                         })}
-                    </Row>
-                    <h4>doc2vec results</h4>
-
-                    <Row>
+                    </div>
+                    <div
+                        className="raleway"
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            flexDirection: 'column',
+                            marginTop: 50,
+                            marginBottom: 30
+                        }}
+                    >
+                        <h1 style={{ fontSize: '3em' }}>Doc2vec Results</h1>
+                    </div>
+                    <div
+                        className="raleway"
+                        style={{
+                            display: 'flex',
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            justifyContent: 'space-evenly'
+                        }}
+                    >
                         {results.doc2vec.map(hit => {
                             const { image_path, labelAnnotations } = hit._source;
                             const descriptions = labelAnnotations.map(annotation => {
@@ -300,7 +413,7 @@ const App = () => {
                                 </Card>
                             );
                         })}
-                    </Row>
+                    </div>
                 </Container>
             ) : null}
         </Container>
