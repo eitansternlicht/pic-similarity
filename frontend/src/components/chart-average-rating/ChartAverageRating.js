@@ -36,7 +36,8 @@ const toOptions = ({ ratingType, width, height }) => ({
     }
 });
 
-export const toData = (scoresDocs, ratingType) => {
+
+export const toData = ({docs, ratingType}) => {
     return {
         categories: Object.values(categoriesByTen).sort(),
         series: [
@@ -46,7 +47,7 @@ export const toData = (scoresDocs, ratingType) => {
                     ...mapValues(_ => undefined, categoriesByTen),
                     ...mapValues(
                         val => average(val).toFixed(1),
-                        similarityGroupsToUserRatings('tfIdf', scoresDocs, ratingType)
+                        similarityGroupsToUserRatings('tfIdf', docs, ratingType)
                     )
                 })
             },
@@ -56,7 +57,7 @@ export const toData = (scoresDocs, ratingType) => {
                     ...mapValues(_ => undefined, categoriesByTen),
                     ...mapValues(
                         val => average(val).toFixed(1),
-                        similarityGroupsToUserRatings('doc2vec', scoresDocs, ratingType)
+                        similarityGroupsToUserRatings('doc2vec', docs, ratingType)
                     )
                 })
             }
@@ -64,7 +65,7 @@ export const toData = (scoresDocs, ratingType) => {
     };
 };
 
-const ChartAverageRating = ({ docs, ratingType }) => (
-    <ColumnChart data={toData(docs, ratingType)} options={toOptions(ratingType)} />
-);
+const ChartAverageRating = (props) => 
+    (<ColumnChart data={toData(props)} options={toOptions(props)} />);
+
 export default ChartAverageRating;
