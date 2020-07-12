@@ -8,13 +8,14 @@ import { API } from '../../config/GoogleVision';
 import Button from 'react-bootstrap/Button';
 import Card from 'react-bootstrap/Card';
 import Container from 'react-bootstrap/Container';
+import ReactHoverObserver from 'react-hover-observer';
 import Row from 'react-bootstrap/Row';
 import Spinner from 'react-bootstrap/Spinner';
 import { auth } from '../../config/firebase';
+import { average } from '../../utils/func-utils';
 import axios from 'axios';
 import { toImageURL } from '../../utils/app-utils';
-import ReactHoverObserver from 'react-hover-observer';
-import { average } from '../../utils/func-utils';
+
 const ImageHoverDisplayer = ({ isHovering = false, imgSrc }) => (
     <div style={{ width: 400, height: 500 }}>
         Is Hovering: {isHovering ? 'image has no disc' : <img src={imgSrc} />}
@@ -359,7 +360,7 @@ const App = () => {
                                 return annotation.description;
                             });
                             const descriptionString = descriptions.join(', ');
-                            const url = `http://localhost:${SERVER_PORT}/image-storage/${image_path}`;
+                            const url = `${SERVER_URL}/image-storage/${image_path}`;
                             return (
                                 <Card style={{ width: '18rem' }}>
                                     <Card.Img variant="top" src={url} />
@@ -400,7 +401,7 @@ const App = () => {
                                 return annotation.description;
                             });
                             const descriptionString = descriptions.join(', ');
-                            const url = `http://localhost:${SERVER_PORT}/image-storage/${image_path}`;
+                            const url = `${SERVER_URL}/image-storage/${image_path}`;
                             return (
                                 <Card style={{ width: '18rem' }}>
                                     <Card.Img variant="top" src={url} />
