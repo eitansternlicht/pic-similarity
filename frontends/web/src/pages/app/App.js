@@ -8,7 +8,6 @@ import { API } from '../../config/GoogleVision';
 import Button from 'react-bootstrap/Button';
 import Card from 'react-bootstrap/Card';
 import Container from 'react-bootstrap/Container';
-import ReactHoverObserver from 'react-hover-observer';
 import Row from 'react-bootstrap/Row';
 import Spinner from 'react-bootstrap/Spinner';
 import { auth } from '../../config/firebase';
