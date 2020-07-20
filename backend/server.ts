@@ -37,16 +37,20 @@ App.get('/random', (_, response) =>
 
 App.post('/query-annotations', (req, response) => {
     const terms = labelAnnotationsToTerms(req.body);
+    console.log('terms', terms);
     Promise.all([
         axios.post('http://localhost:8000', terms),
         Promise.resolve().then(() => {
             const freqs = frequencies(terms);
+            console.log('freqs', freqs);
             const tf_vector = Object.fromEntries(
                 Object.entries(freqs).map(([term, freq]) => [term, freq / terms.length])
             );
             const termToTfIdf = tf_to_tfIdf(termToIdf, tf_vector);
             const sparseVecTfIdf = Object.fromEntries(
-                Object.entries(termToTfIdf).map(([term, tfIdf]) => [termToId[term], tfIdf])
+                Object.entries(termToTfIdf)
+                    .map(([term, tfIdf]) => (termToId[term] ? [termToId[term], tfIdf] : null))
+                    .filter(v => v)
             );
             return sparseVecTfIdf;
         })
