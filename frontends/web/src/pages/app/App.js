@@ -82,14 +82,17 @@ const App = () => {
         var file = searchImage;
         var reader = new FileReader();
         reader.readAsDataURL(file);
-        reader.onloadend = processFile;
+        console.log('file', file);
+        console.log('reader', reader);
+        reader.onloadend = processFile(file.type);
     }
+    function processFile(fileType) {
+        return function (event) {
+            const encodedFile = event.target.result.replace(`data:${fileType};base64,`, '');
 
-    function processFile(event) {
-        const encodedFile = event.target.result.replace('data:image/jpeg;base64,', '');
-
-        //console.log(fromByteArray(encodedFile));
-        sendFiletoCloudVision(encodedFile);
+            //console.log(fromByteArray(encodedFile));
+            sendFiletoCloudVision(encodedFile);
+        };
     }
 
     const sendFiletoCloudVision = encodedFile => {
