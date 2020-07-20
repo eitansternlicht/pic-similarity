@@ -12,7 +12,8 @@ import { runPerformanceTests } from './performace-tests';
 
 // runPerformanceTests();
 const { termToId, termToIdf } = initTfIdfData(readJSON('db/docs.esdata'));
-
+// termToId = {"bla": "4", "hello": "2750"}
+// termToIdf = {"bla": log(5000 / 60), "hello": log(5000 / 700)}
 // console.log('termToId', termToId);
 // console.log('termToIdf', termToIdf);
 
@@ -34,7 +35,8 @@ App.get('/random', (_, response) =>
         error => console.log(error)
     )
 );
-
+// {"bla": 2, "hello": 1} = freq(["bla", "bla", "hello"]);
+// [["bla", 2], ["hello", 1]]
 App.post('/query-annotations', (req, response) => {
     const terms = labelAnnotationsToTerms(req.body);
     console.log('terms', terms);
