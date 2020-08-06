@@ -362,7 +362,7 @@ const App = () => {
                                 return annotation.description;
                             });
                             const descriptionString = descriptions.join(', ');
-                            const url = `${SERVER_URL}/image-storage/${image_path}`;
+                            const url = toImageURL(image_path);
                             return (
                                 <Card style={{ width: '18rem' }}>
                                     <Card.Img variant="top" src={url} />
@@ -403,7 +403,7 @@ const App = () => {
                                 return annotation.description;
                             });
                             const descriptionString = descriptions.join(', ');
-                            const url = `${SERVER_URL}/image-storage/${image_path}`;
+                            const url = toImageURL(image_path);
                             return (
                                 <Card style={{ width: '18rem' }}>
                                     <Card.Img variant="top" src={url} />
